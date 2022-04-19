@@ -1,6 +1,7 @@
 process FASTQC {
     tag "$meta.id"
     label 'process_medium'
+    publishDir "$baseDir/MiSeqAnalysisFiles/$meta/QC/raw", mode: "copy"
 
     conda (params.enable_conda ? "bioconda::fastqc=0.11.9" : null)
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
