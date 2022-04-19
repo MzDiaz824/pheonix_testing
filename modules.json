@@ -1,6 +1,6 @@
 {
-    "name": "nf-core/qtest",
-    "homePage": "https://github.com/nf-core/qtest",
+    "name": "nf-core/quaisar",
+    "homePage": "https://github.com/nf-core/quaisar",
     "repos": {
         "nf-core/modules": {
             "bbmap/bbduk": {

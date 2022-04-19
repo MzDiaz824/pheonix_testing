@@ -1,6 +1,6 @@
-# nf-core/qtest: Documentation
+# nf-core/quaisar: Documentation
 
-The nf-core/qtest documentation is split into the following pages:
+The nf-core/quaisar documentation is split into the following pages:
 
 * [Usage](usage.md)
     * An overview of how the pipeline works, how to run it and a description of all of the different command-line flags.

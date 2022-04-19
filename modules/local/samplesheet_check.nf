@@ -13,7 +13,7 @@ process SAMPLESHEET_CHECK {
     path '*.csv'       , emit: csv
     path "versions.yml", emit: versions
 
-    script: // This script is bundled with the pipeline, in nf-core/qtest/bin/
+    script: // This script is bundled with the pipeline, in nf-core/quaisar/bin/
     """
     check_samplesheet.py \\
         $samplesheet \\

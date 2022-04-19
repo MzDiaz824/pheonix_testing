@@ -1,4 +1,4 @@
-# nf-core/qtest: Output
+# nf-core/quaisar: Output
 
 ## Introduction
 

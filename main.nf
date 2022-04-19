@@ -1,11 +1,11 @@
 #!/usr/bin/env nextflow
 /*
 ========================================================================================
-    nf-core/qtest
+    nf-core/quaisar
 ========================================================================================
-    Github : https://github.com/nf-core/qtest
-    Website: https://nf-co.re/qtest
-    Slack  : https://nfcore.slack.com/channels/qtest
+    Github : https://github.com/nf-core/quaisar
+    Website: https://nf-co.re/quaisar
+    Slack  : https://nfcore.slack.com/channels/quaisar
 ----------------------------------------------------------------------------------------
 */
 
@@ -27,7 +27,7 @@ params.bulkFastqBase = "$baseDir/MiSeqAnalysisFiles/reads2QC/*{R1,R2}_001.fastq"
 ========================================================================================
 */
 
-//WorkflowMain.initialise(workflow, params, log)
+WorkflowMain.initialise(workflow, params, log)
 
 /*
 ========================================================================================
@@ -36,6 +36,7 @@ params.bulkFastqBase = "$baseDir/MiSeqAnalysisFiles/reads2QC/*{R1,R2}_001.fastq"
 */
 
 //include { QTEST } from './workflows/qtest'
+include { QUAISAR } from './workflows/quaisar'
 include { BBMAP_BBDUK } from './modules/nf-core/modules/bbmap/bbduk/main'
 include { UNZIPFASTQ } from './modules/local/unzipfq/main'
 include { FASTP } from './modules/nf-core/modules/fastp/main'
@@ -50,8 +51,9 @@ include { MLST } from './modules/nf-core/modules/mlst/main'
 //
 // WORKFLOW: Run main nf-core/qtest analysis pipeline
 //
+
 /*workflow NFCORE_QTEST {
-    QTEST ()
+    QUAISAR ()
 }*/
 Channel
     .fromFilePairs( params.reads )
@@ -80,7 +82,7 @@ Channel
 // See: https://github.com/nf-core/rnaseq/issues/619
 //
 /*workflow {
-    NFCORE_QTEST ()
+    NFCORE_QUAISAR ()
 }*/
 
 workflow {
