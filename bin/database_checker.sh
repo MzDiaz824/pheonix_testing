@@ -37,31 +37,32 @@ fi
 # Shows where databases should be (installed)
 echo "${path_to_DBs}"
 
-if [[ ! -f "${path_to_DBs}/DB_versions.txt" ]]; then
+if [[ ! -f "${path_to_DBs}/DB_version.txt" ]]; then
 	do_download="true"
 else
-	local_DB_version=$(tail -n1 "${path_to_DBs}/DB_versions.txt" | cut -d'-' -f1)
-	echo "Downloading latest database version file (wget ftp://ftp.cdc.gov/pub/QUAISAR-FTP/DB_versions.txt)"
-	wget -O "${path_to_DBs}/DB_versions_remote.txt" "ftp://ftp.cdc.gov/pub/QUAISAR-FTP/DB_versions.txt"
-	remote_DB_version=$(tail -n1 "${path_to_DBs}/DB_versions_remote.txt" | cut -d'-' -f1)
+	local_DB_version=$(tail -n1 "${path_to_DBs}/DB_version.txt" | cut -d'-' -f1)
+	echo "Downloading latest database version file (wget ftp://ftp.cdc.gov/pub/QUAISAR-FTP/DB_version.txt)"
+	wget -O "${path_to_DBs}/DB_version_remote.txt" "ftp://ftp.cdc.gov/pub/QUAISAR-FTP/DB_version.txt"
+	remote_DB_version=$(tail -n1 "${path_to_DBs}/DB_version_remote.txt" | cut -d'-' -f1)
 	if [[ "${local_DB_version}" = "${remote_DB_version}" ]]; then
 		echo "Databases are up to date!"
 	else
 		echo "Databases need to be updated"
 		do_update="true"
 	fi
+	rm "${path_to_DBs}/DB_version_remote.txt"
 fi
 
 if [[ "${do_download}" = "true" ]]; then
-	echo "Downloading latest database version file (wget ftp://ftp.cdc.gov/pub/QUAISAR-FTP/DB_versions.txt)"
-	wget -O "${path_to_DBs}/DB_versions_remote.txt" "ftp://ftp.cdc.gov/pub/QUAISAR-FTP/DB_versions.txt"
-	remote_DB_version=$(tail -n1 "${path_to_DBs}/DB_versions_remote.txt" | cut -d'-' -f1)
+	echo "Downloading latest database version file (wget ftp://ftp.cdc.gov/pub/QUAISAR-FTP/DB_version.txt)"
+	wget -O "${path_to_DBs}/DB_version.txt" "ftp://ftp.cdc.gov/pub/QUAISAR-FTP/DB_version.txt"
 	do_update="true"
 fi
 
 if [[ "${do_update}" = "true" ]]; then
-	remote_DB_version=$(tail -n1 "${path_to_DBs}/DB_versions_remote.txt" | cut -d'-' -f1)
-	echo "Downloading latest database version file (wget ftp://ftp.cdc.gov/pub/QUAISAR-FTP/${remote_DB_version}.tar.gz)"
-	wget -O "${path_to_DBs}/DB_version_${remote_DB_version}.tar.gz" "ftp://ftp.cdc.gov/pub/QUAISAR-FTP/${remote_DB_version}.tar.gz"
-	tar -zvxf "${path_to_DBs}/DB_version_${remote_DB_version}.tar.gz" -C "${path_to_DBs}"
+	DB_version=$(tail -n1 "${path_to_DBs}/DB_version.txt" | cut -d'-' -f1)
+	echo "Downloading latest database tar file (wget ftp://ftp.cdc.gov/pub/QUAISAR-FTP/${DB_version}.tar.gz)"
+	wget -O "${path_to_DBs}/DB_version_${DB_version}.tar.gz" "ftp://ftp.cdc.gov/pub/QUAISAR-FTP/${DB_version}.tar.gz"
+	tar tzf "${path_to_DBs}/DB_version_${DB_version}.tar.gz" > "${path_to_DBs}/DB_version_${DB_version}_expanded.txt"
+	tar -zvxf "${path_to_DBs}/DB_version_${DB_version}.tar.gz" -C "${path_to_DBs}"
 fi
