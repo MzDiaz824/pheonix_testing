@@ -38,7 +38,7 @@ fi
 echo "${path_to_DBs}"
 
 if [[ ! -f "${path_to_DBs}/DB_versions.txt" ]]; then
-	do_update="true"
+	do_download="true"
 else
 	local_DB_version=$(tail -n1 "${path_to_DBs}/DB_versions.txt" | cut -d'-' -f1)
 	echo "Downloading latest database version file (wget ftp://ftp.cdc.gov/pub/QUAISAR-FTP/DB_versions.txt)"
@@ -56,6 +56,7 @@ if [[ "${do_download}" = "true" ]]; then
 	echo "Downloading latest database version file (wget ftp://ftp.cdc.gov/pub/QUAISAR-FTP/DB_versions.txt)"
 	wget -O "${path_to_DBs}/DB_versions_remote.txt" "ftp://ftp.cdc.gov/pub/QUAISAR-FTP/DB_versions.txt"
 	remote_DB_version=$(tail -n1 "${path_to_DBs}/DB_versions_remote.txt" | cut -d'-' -f1)
+	do_update="true"
 fi
 
 if [[ "${do_update}" = "true" ]]; then
