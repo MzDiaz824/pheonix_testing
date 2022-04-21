@@ -1,8 +1,13 @@
 /*
-// Check database location for most up to date versions and updates if necessary
+========================================================================================
+    Processes
+========================================================================================
 */
 
+params.databases = ./bin/databases
+
 process database_check {
+    db_ch = Channel.fromPath(${params.databases}, checkIfExists: true )
 
     input:
     path(db_path)
@@ -13,4 +18,8 @@ process database_check {
     """
         database_checker.sh ${db_path}
     """
+}
+
+workflow database_check {
+  database_check(params.databases)
 }
