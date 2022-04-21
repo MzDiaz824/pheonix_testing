@@ -9,7 +9,6 @@
 params.databases = "./bin/databases"
 
 process database_check {
-    db_ch = Channel.fromPath( params.databases, checkIfExists: true )
 
     input:
     path db_path
@@ -22,6 +21,8 @@ process database_check {
     """
 }
 
+db_ch = Channel.fromPath( params.databases, checkIfExists: true )
+
 workflow database_checker {
-  database_check(params.databases)
+  database_check(db_ch)
 }
