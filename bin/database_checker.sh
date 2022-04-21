@@ -62,6 +62,6 @@ fi
 if [[ "${do_update}" = "true" ]]; then
 	remote_DB_version=$(tail -n1 "${path_to_DBs}/DB_versions_remote.txt" | cut -d'-' -f1)
 	echo "Downloading latest database version file (wget ftp://ftp.cdc.gov/pub/QUAISAR-FTP/${remote_DB_version}.tar.gz)"
-	wget -O "${path_to_DBs}/DB_version_${remote_DB_version}.txt" "ftp://ftp.cdc.gov/pub/QUAISAR-FTP/${remote_DB_version}.tar.gz"
-	gzip -zvxf "${path_to_DBs}/DB_version_${remote_DB_version}.txt"
+	wget -O "${path_to_DBs}/DB_version_${remote_DB_version}.tar.gz" "ftp://ftp.cdc.gov/pub/QUAISAR-FTP/${remote_DB_version}.tar.gz"
+	gunzip -zvxf "${path_to_DBs}/DB_version_${remote_DB_version}.txt"
 fi
