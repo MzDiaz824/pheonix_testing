@@ -21,6 +21,6 @@ process database_check {
     """
 }
 
-workflow database_check {
+workflow database_checker {
   database_check(params.databases)
 }
