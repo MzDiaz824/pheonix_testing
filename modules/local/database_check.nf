@@ -1,3 +1,5 @@
+nextflow.preview.dsl=2
+
 /*
 ========================================================================================
     Processes
@@ -17,7 +19,7 @@ process database_check {
 
     script:
     """
-        database_checker.sh db_path
+        database_checker.sh $db_path
     """
 }
 
