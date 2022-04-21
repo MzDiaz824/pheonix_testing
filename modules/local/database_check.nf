@@ -1,4 +1,3 @@
-nextflow.preview.dsl=2
 
 /*
 ========================================================================================
@@ -25,6 +24,6 @@ process database_check {
 
 db_ch = Channel.fromPath( params.databases, checkIfExists: true )
 
-workflow database_checker {
+workflow {
   database_check(db_ch)
 }
