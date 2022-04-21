@@ -12,13 +12,13 @@ process database_check {
     db_ch = Channel.fromPath( params.databases, checkIfExists: true )
 
     input:
-    path(db_path)
+    path db_path
 
     output:
 
     script:
     """
-        database_checker.sh ${db_path}
+        database_checker.sh db_path
     """
 }
 
