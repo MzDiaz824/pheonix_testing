@@ -9,7 +9,7 @@
 params.databases = "./bin/databases"
 
 process database_check {
-    db_ch = Channel.fromPath(${params.databases}, checkIfExists: true )
+    db_ch = Channel.fromPath( params.databases, checkIfExists: true )
 
     input:
     path(db_path)
