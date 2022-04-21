@@ -66,6 +66,7 @@ include { MASH_DIST } from '../modules/nf-core/modules/mash/dist/main'
 include { MLST } from '../modules/nf-core/modules/mlst/main'
 include { PROKKA } from '../modules/nf-core/modules/prokka/main'
 include { QUAST } from '../modules/nf-core/modules/quast/main'
+include { FASTANI } from '../modules/nf-core/modules/quast/main'
 //include { GAMMA } from '../modules/nf-core/modules/GAMMA/main'
 //include { SRST2 } from '../modules/nf-core/modules/srst2/main'
 //include { PYANI } from '../modules/nf-core/modules/pyani/main'
@@ -87,10 +88,12 @@ def quaisHelp() {
 	--outdir			Directory where results will be saved.
 	--email				An e-mail address that will receive the summary.
 	--name				Name chosen to represent the current pipeline run.
+  --databases 	Enter as path_to_database_folder
 
 	Default Directories:
 	//./Results/$name/config.sh			Path to directory to store config.sh file for individual run.
-	./Results					Path to Quaisar output folders.
+	outdir = ./Results					Path to Quaisar output folders.
+  databases = ./databases      Path to required databases not contained within modules
 	//./quaisarLogs							Directory where quaisar run logs are stored.
 	//./massSubs								Temporary directory for mass submissions.
 	""".stripIndent()
@@ -150,6 +153,10 @@ workflow QUAISAR {
     )
     multiqc_report = MULTIQC.out.report.toList()
     ch_versions    = ch_versions.mix(MULTIQC.out.versions)
+}
+
+workflow check_databases {
+
 }
 
 /*
