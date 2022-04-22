@@ -1,44 +1,58 @@
-# ![nf-core/quaisar](docs/images/nf-core-quaisar_logo_light.png#gh-light-mode-only) ![nf-core/quaisar](docs/images/nf-core-quaisar_logo_dark.png#gh-dark-mode-only)
-
-[![GitHub Actions CI Status](https://github.com/nf-core/quaisar/workflows/nf-core%20CI/badge.svg)](https://github.com/nf-core/quaisar/actions?query=workflow%3A%22nf-core+CI%22)
-[![GitHub Actions Linting Status](https://github.com/nf-core/quaisar/workflows/nf-core%20linting/badge.svg)](https://github.com/nf-core/quaisar/actions?query=workflow%3A%22nf-core+linting%22)
-[![AWS CI](https://img.shields.io/badge/CI%20tests-full%20size-FF9900?labelColor=000000&logo=Amazon%20AWS)](https://nf-co.re/quaisar/results)
-
-[![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.XXXXXXX-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.XXXXXXX)
-
-[![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A521.10.3-23aa62.svg?labelColor=000000)](https://www.nextflow.io/)
-[![run with conda](http://img.shields.io/badge/run%20with-conda-3EB049?labelColor=000000&logo=anaconda)](https://docs.conda.io/en/latest/)
-[![run with docker](https://img.shields.io/badge/run%20with-docker-0db7ed?labelColor=000000&logo=docker)](https://www.docker.com/)
-[![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)
-
-[![Get help on Slack](http://img.shields.io/badge/slack-nf--core%20%23quaisar-4A154B?labelColor=000000&logo=slack)](https://nfcore.slack.com/channels/quaisar)
-
-[![Follow on Twitter](http://img.shields.io/badge/twitter-%40nf__core-1DA1F2?labelColor=000000&logo=twitter)](https://twitter.com/nf_core)
-[![Watch on YouTube](http://img.shields.io/badge/youtube-nf--core-FF0000?labelColor=000000&logo=youtube)](https://www.youtube.com/c/nf-core)
-
-## Introduction
-
-<!-- TODO nf-core: Write a 1-2 sentence summary of what data the pipeline is for and what it does -->
-
-**nf-core/quaisar** is a bioinformatics best-practice analysis pipeline for Quality, Assembly, Identification, Sequencing Typing, Annotation and Resistance mechanisms.
-
-
-The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It uses Docker/Singularity containers making installation trivial and results highly reproducible. The [Nextflow DSL2](https://www.nextflow.io/docs/latest/dsl2.html) implementation of this pipeline uses one container per process which makes it much easier to maintain and update software dependencies. Where possible, these processes have been submitted to and installed from [nf-core/modules](https://github.com/nf-core/modules) in order to make them available to all nf-core pipelines, and to everyone within the Nextflow community!
-
-<!-- TODO nf-core: Add full-sized test dataset and amend the paragraph below if applicable -->
-
-On release, automated continuous integration tests run the pipeline on a full-sized dataset on the AWS cloud infrastructure. This ensures that the pipeline runs on AWS, has sensible resource allocation defaults set to run on real-world datasets, and permits the persistent storage of results to benchmark between pipeline releases and other analysis sources. The results obtained from the full-sized test can be viewed on the [nf-core website](https://nf-co.re/quaisar/results).
-
-## Pipeline summary
-
+### Pipeline summary:
+-------------------------------------------------------------------------------------------------------------------------------------------------------
 <!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->
 
+1. PhiX adapter trimming and filtering of reads using BBDuK ([`BBDuK`](https://github.com/BioInfoTools/BBMap))
+2. Read filtering, adapter trimming, quality profiling and base correction using fastp ([`fastp`](https://github.com/OpenGene/fastp))
+3. Raw Reads QC Assessment specifics found in "QC Summary by Read Processing State" section 
 
-1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+#### <div align="center">*T Denotes Trimmed Reads that Were Not Assembled</div>
+#### <div align="center">*A Denotes Reads that Proceed to Assembly</div>
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+
+### Analysis of Trimmed Reads
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+4T. Gene detection and allele calling for antibiotic resistance, virulence (adding hypervirulence genes beyond their mention in the alerts section?), and/or plasmids using srst2 AR ([`srst2 AR`](https://github.com/katholt/srst2) <br>
+5T. Report sequence types based on MLST alleles and profile definitions using srst2 MLST ([`srst2 MLST`](https://github.com/katholt/srst2)) <br>
+6T. Kraken2? ()<br>
+
+### Assembly
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+5. Assemby of trimed reads using SPAdes ([`SPAdes`](https://github.com/ablab/spades))<br>
+### Analysis of Assembled Reads <= 500bps
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+4A. Assess assembly quality using QUAST ([`QUAST`](https://github.com/ablab/quast)) <br>
+5A. Measure the nucleotide-level coding region similarity (between genomes) using fastANI ([`fastANI`](https://github.com/ParBLiSS/FastANI))<br>
+6A. Type multiple loci to characterized isolates of microbial species using MLST ([`MLST`](https://github.com/tseemann/mlst))<br>
+7A. Detect hypervirulence genes and find best matches to untranslated genes from a gene database using GAMMA ([`GAMMA`](https://github.com/rastanton/GAMMA))<br>
+9A. Rapid whole genome annotation using Prokka ([`PROKKA`](https://github.com/tseemann/prokka))<br>
+10A. Assess genome assembly for completeness using BUSCO ([`BUSCO`](https://busco.ezlab.org/))<br>
+11A. KRAKEN2?? ()<br>
+
+### Analysis of Assembled Reads >= 2000bps (Mention that we may use this instead of 1000bps currently in use)
+    
+
+<!-- Add conditional statement to workflow nf files to differentiate-->
+### Format Results of Analysis
+
+### QC Summary by Read Processing State
+
+<!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->
+#### Raw Reads
+1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))<br>
 2. Present QC for raw reads ([`MultiQC`](http://multiqc.info/))
 
+#### Trimmed Reads
 
-## Quick Start
+
+
+
+![Workflow](https://github.com/MzDiaz824/QuAISAR_Nextflow/docs/images/WF.PNG?raw=true)
+
+### Quick Start
 
 1. Install [`Nextflow`](https://www.nextflow.io/docs/latest/getstarted.html#installation) (`>=21.10.3`)
 
@@ -107,3 +121,17 @@ You can cite the `nf-core` publication as follows:
 > Philip Ewels, Alexander Peltzer, Sven Fillinger, Harshil Patel, Johannes Alneberg, Andreas Wilm, Maxime Ulysse Garcia, Paolo Di Tommaso & Sven Nahnsen.
 >
 > _Nat Biotechnol._ 2020 Feb 13. doi: [10.1038/s41587-020-0439-x](https://dx.doi.org/10.1038/s41587-020-0439-x).
+
+
+## Introduction (Needs to be developed then will move to top of page)
+
+<!-- TODO nf-core: Write a 1-2 sentence summary of what data the pipeline is for and what it does -->
+
+**nf-core/quaisar** is a bioinformatics best-practice analysis pipeline for Quality, Assembly, Identification, Sequencing Typing, Annotation and Resistance mechanisms.
+
+
+The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It uses Docker/Singularity containers making installation trivial and results highly reproducible. The [Nextflow DSL2](https://www.nextflow.io/docs/latest/dsl2.html) implementation of this pipeline uses one container per process which makes it much easier to maintain and update software dependencies. Where possible, these processes have been submitted to and installed from [nf-core/modules](https://github.com/nf-core/modules) in order to make them available to all nf-core pipelines, and to everyone within the Nextflow community!
+
+<!-- TODO nf-core: Add full-sized test dataset and amend the paragraph below if applicable -->
+
+On release, automated continuous integration tests run the pipeline on a full-sized dataset on the AWS cloud infrastructure. This ensures that the pipeline runs on AWS, has sensible resource allocation defaults set to run on real-world datasets, and permits the persistent storage of results to benchmark between pipeline releases and other analysis sources. The results obtained from the full-sized test can be viewed on the [nf-core website](https://nf-co.re/quaisar/results)
