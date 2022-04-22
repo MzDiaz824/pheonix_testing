@@ -7,7 +7,7 @@
 def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
 
 // Validate input parameters
-WorkflowQtest.initialise(params, log)
+WorkflowQuaisar.initialise(params, log)
 
 // TODO nf-core: Add all file path parameters for the pipeline to the list below
 // Check input path parameters to see if they exist
@@ -46,9 +46,58 @@ include { INPUT_CHECK } from '../subworkflows/local/input_check'
 //
 // MODULE: Installed directly from nf-core/modules
 //
-include { FASTQC                      } from '../modules/nf-core/modules/fastqc/main'
-include { MULTIQC                     } from '../modules/nf-core/modules/multiqc/main'
+include { QUAISAR } from '../workflows/quaisar'
+//include { READ_RUN } from '../subworkflows/read_run'
+//include { ASSEMBLY_RUN } from '../subworkflows/assembly_run'
+//include { UPDATE_DB_DEPENDANTS } from '../subworkflows/update_DB_dependants'
+//include { UPDATE_DBS } from '../subworkflows/update_DBs'
+include { BBMAP_BBDUK } from '../modules/nf-core/modules/bbmap/bbduk/main'
+include { UNZIPFASTQ } from '../modules/local/unzipfq/main'
+include { FASTP } from '../modules/nf-core/modules/fastp/main'
+include { BLAST } from '../modules/nf-core/modules/blast/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'
+include { GUNZIP } from '../modules/nf-core/modules/gunzip/main'
+include { SPADES } from '../modules/nf-core/modules/spades/main'
+include { KRAKEN2 } from '../modules/nf-core/modules/kraken2/kraken2/main'
+include { KRONA } from '../modules/nf-core/modules/krona/main'
+include { QUAST } from '../modules/nf-core/modules/quast/main'
+include { MASHTREE } from '../modules/nf-core/modules/mashree/main'
+include { MASH_DIST } from '../modules/nf-core/modules/mash/dist/main'
+include { MLST } from '../modules/nf-core/modules/mlst/main'
+include { PROKKA } from '../modules/nf-core/modules/prokka/main'
+include { QUAST } from '../modules/nf-core/modules/quast/main'
+include { FASTANI } from '../modules/nf-core/modules/quast/main'
+//include { GAMMA } from '../modules/nf-core/modules/GAMMA/main'
+//include { SRST2 } from '../modules/nf-core/modules/srst2/main'
+//include { PYANI } from '../modules/nf-core/modules/pyani/main'
+//include { BUSCO } from '../modules/nf-core/modules/busco/main'
+
+========================================================================================
+   Quaisar Help Function
+========================================================================================
+*/
+
+def quaisHelp() {
+	log.info """
+	Usage 1: nextflow run quaisar.nf
+
+	Filepath Options:
+	--input_folder 			Enter as 'path_to_reads/*_R{1,2}.fastq.gz'
+
+	Main Options:
+	--outdir			Directory where results will be saved.
+	--email				An e-mail address that will receive the summary.
+	--name				Name chosen to represent the current pipeline run.
+  --databases 	Enter as path_to_database_folder
+
+	Default Directories:
+	//./Results/$name/config.sh			Path to directory to store config.sh file for individual run.
+	outdir = ./Results					Path to Quaisar output folders.
+  databases = ./databases      Path to required databases not contained within modules
+	//./quaisarLogs							Directory where quaisar run logs are stored.
+	//./massSubs								Temporary directory for mass submissions.
+	""".stripIndent()
+}
 
 /*
 ========================================================================================
@@ -59,9 +108,12 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/modules/custom/
 // Info required for completion email and summary
 def multiqc_report = []
 
-workflow QTEST {
+workflow QUAISAR {
 
     ch_versions = Channel.empty()
+    input_reads_ch = Channel.fromFilePairs("${params.input_folder}/*_R{1,2}*.{fastq,fastq.gz,fq,fq.gz}", checkIfExists: true )
+    // input_assemblies_ch = Channel.fromPath("${params.input_folder}/*.{fasta,fna}", checkIfExists: true )
+    // input_SRAs_ch =
 
     //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
@@ -86,7 +138,7 @@ workflow QTEST {
     //
     // MODULE: MultiQC
     //
-    workflow_summary    = WorkflowQtest.paramsSummaryMultiqc(workflow, summary_params)
+    workflow_summary    = WorkflowQuaisar.paramsSummaryMultiqc(workflow, summary_params)
     ch_workflow_summary = Channel.value(workflow_summary)
 
     ch_multiqc_files = Channel.empty()
@@ -101,6 +153,10 @@ workflow QTEST {
     )
     multiqc_report = MULTIQC.out.report.toList()
     ch_versions    = ch_versions.mix(MULTIQC.out.versions)
+}
+
+workflow check_databases {
+
 }
 
 /*
