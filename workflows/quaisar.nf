@@ -1,13 +1,15 @@
 /*
 ========================================================================================
-    VALIDATE INPUTS
+    PARAMETERS & CHANNELS
 ========================================================================================
 */
 
 def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
 
 // Validate input parameters
-WorkflowQuaisar.initialise(params, log)
+ch_versions = Channel.empty()
+input_reads_ch = Channel.fromFilePairs("${params.input_folder}/*_R{1,2}*.{fastq,fastq.gz,fq,fq.gz}", checkIfExists: true )
+/*WorkflowQuaisar.initialise(params, log)
 
 // TODO nf-core: Add all file path parameters for the pipeline to the list below
 // Check input path parameters to see if they exist
@@ -16,7 +18,7 @@ for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true
 
 // Check mandatory parameters
 if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
-
+*/
 /*
 ========================================================================================
     CONFIG FILES
@@ -31,11 +33,11 @@ ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multi
     IMPORT LOCAL MODULES/SUBWORKFLOWS
 ========================================================================================
 */
-
+include { UNZIPFASTQ } from '../modules/local/unzipfq/main'
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-include { INPUT_CHECK } from '../subworkflows/local/input_check'
+//include { INPUT_CHECK } from '../subworkflows/local/input_check'
 
 /*
 ========================================================================================
@@ -52,7 +54,6 @@ include { QUAISAR } from '../workflows/quaisar'
 //include { UPDATE_DB_DEPENDANTS } from '../subworkflows/update_DB_dependants'
 //include { UPDATE_DBS } from '../subworkflows/update_DBs'
 include { BBMAP_BBDUK } from '../modules/nf-core/modules/bbmap/bbduk/main'
-include { UNZIPFASTQ } from '../modules/local/unzipfq/main'
 include { FASTP } from '../modules/nf-core/modules/fastp/main'
 include { BLAST } from '../modules/nf-core/modules/blast/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'
@@ -69,7 +70,9 @@ include { QUAST } from '../modules/nf-core/modules/quast/main'
 include { FASTANI } from '../modules/nf-core/modules/quast/main'
 //include { GAMMA } from '../modules/nf-core/modules/GAMMA/main'
 //include { SRST2 } from '../modules/nf-core/modules/srst2/main'
+//PYANI DOES NOT EXIST AND THERE IS NO OPEN NF-CORE MODULE ISSUE SUGGESTING A BUILD IS IN PROGRESS
 //include { PYANI } from '../modules/nf-core/modules/pyani/main'
+//BUSCO build status TBD
 //include { BUSCO } from '../modules/nf-core/modules/busco/main'
 
 ========================================================================================
@@ -110,15 +113,39 @@ def multiqc_report = []
 
 workflow QUAISAR {
 
-    ch_versions = Channel.empty()
-    input_reads_ch = Channel.fromFilePairs("${params.input_folder}/*_R{1,2}*.{fastq,fastq.gz,fq,fq.gz}", checkIfExists: true )
+    
+    BBMAP_BBDUK(readPairs, phiX)
+    
+    //process is called like a function in the workflow block
+    //UNZIPFASTQ(tounzip)
+
+    FASTP( BBMAP_BBDUK.out.reads, BBMAP_BBDUK.out.log, BBMAP_BBDUK.out.versions )
+
+    GUNZIP( FASTP.out.reads )
+
+    FASTQC( FASTP.out.reads )
+
+    SPADES( FASTP.out.reads)
+
+    /*Questions re: quast 1. Whether to use the provided gff reference annotation file
+    2. What genome GFF file to use. Has to contain at least a non-empty string dummy value.
+    3. Should we use the provided fasta reference genome file?
+    4. Do we use scaffolds or contigs for the assembly file of interest?
+    QUAST(SPADES.out., SPADES.out., , )*/
+
+    FASTANI( SPADES.out.??) //does mash occur before this?
+
+    MASH_DIST( queryfasta, SPADES.out.scaffolds ) //where do these come from?
+
+    MLST( SPADES.out. ) //scaffolds or contigs assembly fasta file to run MLST?
+
     // input_assemblies_ch = Channel.fromPath("${params.input_folder}/*.{fasta,fna}", checkIfExists: true )
     // input_SRAs_ch =
 
     //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
     //
-    INPUT_CHECK (
+    /*INPUT_CHECK (
         ch_input
     )
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
@@ -152,7 +179,7 @@ workflow QUAISAR {
         ch_multiqc_files.collect()
     )
     multiqc_report = MULTIQC.out.report.toList()
-    ch_versions    = ch_versions.mix(MULTIQC.out.versions)
+    ch_versions    = ch_versions.mix(MULTIQC.out.versions)*/
 }
 
 workflow check_databases {

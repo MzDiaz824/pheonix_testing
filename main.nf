@@ -35,18 +35,7 @@ WorkflowMain.initialise(workflow, params, log)
 ========================================================================================
 */
 
-//include { QTEST } from './workflows/qtest'
 include { QUAISAR } from './workflows/quaisar'
-include { BBMAP_BBDUK } from './modules/nf-core/modules/bbmap/bbduk/main'
-include { UNZIPFASTQ } from './modules/local/unzipfq/main'
-include { FASTP } from './modules/nf-core/modules/fastp/main'
-include { FASTQC } from './modules/nf-core/modules/fastqc/main'
-include { GUNZIP } from './modules/nf-core/modules/gunzip/main'
-include { SPADES } from './modules/nf-core/modules/spades/main'
-include { QUAST } from './modules/nf-core/modules/quast/main'
-include { FASTANI } from './modules/nf-core/modules/fastani/main'
-include { MASH_DIST } from './modules/nf-core/modules/mash/dist/main'
-include { MLST } from './modules/nf-core/modules/mlst/main'
 
 //
 // WORKFLOW: Run main nf-core/qtest analysis pipeline
@@ -81,38 +70,11 @@ Channel
 // WORKFLOW: Execute a single named workflow for the pipeline
 // See: https://github.com/nf-core/rnaseq/issues/619
 //
-/*workflow {
-    NFCORE_QUAISAR ()
-}*/
-
 workflow {
-
-    BBMAP_BBDUK(readPairs, phiX)
-    //process is called like a function in the workflow block
-    //UNZIPFASTQ(tounzip)
-
-    FASTP( BBMAP_BBDUK.out.reads, BBMAP_BBDUK.out.log, BBMAP_BBDUK.out.versions )
-
-    GUNZIP( FASTP.out.reads )
-
-    FASTQC( FASTP.out.reads )
-
-    SPADES( FASTP.out.reads)
-
-    /*Questions re: quast 1. Whether to use the provided gff reference annotation file
-    2. What genome GFF file to use. Has to contain at least a non-empty string dummy value.
-    3. Should we use the provided fasta reference genome file?
-    4. Do we use scaffolds or contigs for the assembly file of interest?
-    QUAST(SPADES.out., SPADES.out., , )*/
-
-    FASTANI( SPADES.out.??) //does mash occur before this?
-
-    MASH_DIST( queryfasta, SPADES.out.scaffolds ) //where do these come from?
-
-    MLST( SPADES.out. ) //scaffolds or contigs assembly fasta file to run MLST?
-
-
+    NFCORE_QUAISAR ()
 }
+
+w
 
 /*
 ========================================================================================
