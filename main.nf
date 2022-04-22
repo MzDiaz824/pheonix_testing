@@ -17,10 +17,25 @@ nextflow.enable.dsl = 2
 ========================================================================================
 */
 //FastQ files must be saved in the FASTQs folder
-params.reads = "$baseDir/FASTQs/*_R{1,2}.fastq.gz"
-params.bulkFastqBase = "$baseDir/MiSeqAnalysisFiles/reads2QC/*{R1,R2}_001.fastq"
+//params.reads = "./FASTQs/*_R{1,2}.fastq.gz"
+//params.bulkFastqBase = "./MiSeqAnalysisFiles/reads2QC/*{R1,R2}_001.fastq"
 //params.fasta = WorkflowMain.getGenomeAttribute(params, 'fasta')
+/*=====================================================================================================================================
+                                                       Channels   
+====================================================================================================================================
+*/
+/*drag and drop files into supplied folder name FASTQs
+those files will be parsed and grouped as pairs
+Will need to add logic to support single reads as current s/u supports paired reads only*/
+Channel
+    .fromFilePairs("$baseDir/FASTQs/*_R{1,2}*.{fastq,fastq.gz,fq,fq.gz}")
+    //.ifEmpty { error "Cannot find any reads matching: ${params.reads}" }
+    .set { readPairs }
 
+Channel
+    .fromFilePairs( params.bulkFastqBase)
+    //.ifEmpty { error "Cannot find any reads matching: ${params.bulkFastqBase}" }
+    .set { fqPairs }
 /*
 ========================================================================================
     VALIDATE & PRINT PARAMETER SUMMARY
@@ -35,29 +50,27 @@ WorkflowMain.initialise(workflow, params, log)
 ========================================================================================
 */
 
-include { QUAISAR } from './workflows/quaisar'
-Channel
+include { QUAISAR } from '../workflows/quaisar'
+include { RAW_READ_QC } from '../subworkflows/local/rawQC'
+
+/*Channel
     .fromPath(params.databases)
-    .ifEmpty {exit 1, "There are no databases found: ${params.databases}"}
+    .ifEmpty {exit 1, "There are no databases found: ${params.databases}"}*/
 //
-// WORKFLOW: Run main nf-core/qtest analysis pipeline
+// WORKFLOW: Run main nf-core/quaisar analysis pipeline
 //
 
-/*workflow NFCORE_QTEST {
+workflow NFCORE_QUAISAR {
     QUAISAR ()
-}*/
-/*Channel
+}
+Channel
     .fromFilePairs( params.reads )
     //.ifEmpty { error "Cannot find any reads matching: ${params.reads}" }
     .set { readPairs }
 Channel
     .fromPath( params.phiX )
-    .set { phiX }*/
-
-/*Channel
-    .fromFilePairs( bulkFastqBase )
-    .ifEmpty { error "Cannot find any reads matching: ${params.reads}" }
-    .set { tounzip }*/
+    .set { phiX }
+//work on creating channels for dbs needed for processes in workflow
 
 /*if ( params.bbmap_adapters ){
     bbmap_adapters = file("${params.bbmap_adapters}")
@@ -75,11 +88,11 @@ Channel
 
     workflow {
         NFCORE_QUAISAR ()
+        RAW_READ_QC (readPairs)
     
 }
 
 
-w
 
 /*
 ========================================================================================
