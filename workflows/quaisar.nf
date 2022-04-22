@@ -8,7 +8,13 @@ def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
 
 // Validate input parameters
 ch_versions = Channel.empty()
-input_reads_ch = Channel.fromFilePairs("${params.input_folder}/*_R{1,2}*.{fastq,fastq.gz,fq,fq.gz}", checkIfExists: true )
+
+/*drag and drop files into supplied folder name FASTQs
+those files will be parsed and grouped as pairs
+Will need to add logic to support single reads as current s/u supports paired reads only*/
+ Channel
+    .fromFilePairs("$baseDir/FASTQs/*_R{1,2}*.{fastq,fastq.gz,fq,fq.gz}", checkIfExists: true )
+    .set(readPairs)
 /*WorkflowQuaisar.initialise(params, log)
 
 // TODO nf-core: Add all file path parameters for the pipeline to the list below
@@ -139,6 +145,10 @@ workflow QUAISAR {
 
     MLST( SPADES.out. ) //scaffolds or contigs assembly fasta file to run MLST?
 
+    
+}
+
+workflow RAW_READ_QC {
     // input_assemblies_ch = Channel.fromPath("${params.input_folder}/*.{fasta,fna}", checkIfExists: true )
     // input_SRAs_ch =
 
@@ -148,13 +158,13 @@ workflow QUAISAR {
     /*INPUT_CHECK (
         ch_input
     )
-    ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
+    ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)*/
 
     //
     // MODULE: Run FastQC
     //
     FASTQC (
-        INPUT_CHECK.out.reads
+        readPairs
     )
     ch_versions = ch_versions.mix(FASTQC.out.versions.first())
 
@@ -179,9 +189,8 @@ workflow QUAISAR {
         ch_multiqc_files.collect()
     )
     multiqc_report = MULTIQC.out.report.toList()
-    ch_versions    = ch_versions.mix(MULTIQC.out.versions)*/
+    ch_versions    = ch_versions.mix(MULTIQC.out.versions)
 }
-
 workflow check_databases {
 
 }
