@@ -36,7 +36,9 @@ WorkflowMain.initialise(workflow, params, log)
 */
 
 include { QUAISAR } from './workflows/quaisar'
-
+Channel
+    .fromPath(params.databases)
+    .ifEmpty {exit 1, "There are no databases found: ${params.databases}"}
 //
 // WORKFLOW: Run main nf-core/qtest analysis pipeline
 //
@@ -44,13 +46,13 @@ include { QUAISAR } from './workflows/quaisar'
 /*workflow NFCORE_QTEST {
     QUAISAR ()
 }*/
-Channel
+/*Channel
     .fromFilePairs( params.reads )
     //.ifEmpty { error "Cannot find any reads matching: ${params.reads}" }
     .set { readPairs }
 Channel
     .fromPath( params.phiX )
-    .set { phiX }
+    .set { phiX }*/
 
 /*Channel
     .fromFilePairs( bulkFastqBase )
@@ -69,10 +71,13 @@ Channel
 //
 // WORKFLOW: Execute a single named workflow for the pipeline
 // See: https://github.com/nf-core/rnaseq/issues/619
-//
-workflow {
-    NFCORE_QUAISAR ()
+//start Workflow if databases exist
+
+    workflow {
+        NFCORE_QUAISAR ()
+    
 }
+
 
 w
 

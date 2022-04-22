@@ -36,10 +36,22 @@ ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multi
 
 /*
 ========================================================================================
-    IMPORT LOCAL MODULES/SUBWORKFLOWS
+    IMPORT LOCAL MODULES
 ========================================================================================
 */
 include { UNZIPFASTQ } from '../modules/local/unzipfq/main'
+
+/*
+========================================================================================
+    IMPORT LOCAL SUBWORKFLOWS
+========================================================================================
+*/
+
+include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'
+//include { READ_RUN } from '../subworkflows/read_run'
+//include { ASSEMBLY_RUN } from '../subworkflows/assembly_run'
+//include { UPDATE_DB_DEPENDANTS } from '../subworkflows/update_DB_dependants'
+//include { UPDATE_DBS } from '../subworkflows/update_DBs'
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
@@ -51,18 +63,13 @@ include { UNZIPFASTQ } from '../modules/local/unzipfq/main'
 ========================================================================================
 */
 
-//
 // MODULE: Installed directly from nf-core/modules
-//
-include { QUAISAR } from '../workflows/quaisar'
-//include { READ_RUN } from '../subworkflows/read_run'
-//include { ASSEMBLY_RUN } from '../subworkflows/assembly_run'
-//include { UPDATE_DB_DEPENDANTS } from '../subworkflows/update_DB_dependants'
-//include { UPDATE_DBS } from '../subworkflows/update_DBs'
+
+
+
 include { BBMAP_BBDUK } from '../modules/nf-core/modules/bbmap/bbduk/main'
 include { FASTP } from '../modules/nf-core/modules/fastp/main'
 include { BLAST } from '../modules/nf-core/modules/blast/main'
-include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'
 include { GUNZIP } from '../modules/nf-core/modules/gunzip/main'
 include { SPADES } from '../modules/nf-core/modules/spades/main'
 include { KRAKEN2 } from '../modules/nf-core/modules/kraken2/kraken2/main'
@@ -81,6 +88,12 @@ include { FASTANI } from '../modules/nf-core/modules/quast/main'
 //BUSCO build status TBD
 //include { BUSCO } from '../modules/nf-core/modules/busco/main'
 
+/*
+========================================================================================
+    IMPORT NF-CORE SUBWORKFLOWS
+========================================================================================
+*/
+/*
 ========================================================================================
    Quaisar Help Function
 ========================================================================================
