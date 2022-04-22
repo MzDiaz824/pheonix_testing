@@ -53,10 +53,7 @@ WorkflowMain.initialise(workflow, params, log)
 include { QUAISAR } from '../workflows/quaisar'
 include { RAW_READ_QC } from '../subworkflows/local/rawQC'
 
-/*Channel
-    .fromPath(params.databases)
-    .ifEmpty {exit 1, "There are no databases found: ${params.databases}"}*/
-//
+
 // WORKFLOW: Run main nf-core/quaisar analysis pipeline
 //
 
@@ -71,7 +68,13 @@ Channel
     .fromPath( params.phiX )
     .set { phiX }
 //work on creating channels for dbs needed for processes in workflow
-
+Channel
+    .fromPath(params.databases)
+    .ifEmpty {exit 1, "There are no databases found: ${params.databases}"}
+    .set { dbs } //need to set up for each dbs
+//This means channel values are consumed serially one after another and the 
+//first empty channel cause the process execution to stop even if there are 
+//other values in other channels.
 /*if ( params.bbmap_adapters ){
     bbmap_adapters = file("${params.bbmap_adapters}")
 }*/
