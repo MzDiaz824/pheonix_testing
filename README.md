@@ -17,7 +17,7 @@
 --------------------------------------------------------------------------------------------------------------------------------------------------------
 4T. Gene detection and allele calling for antibiotic resistance, virulence (adding hypervirulence genes beyond their mention in the alerts section?), and/or plasmids using srst2 AR ([`srst2 AR`](https://github.com/katholt/srst2) <br>
 5T. Report sequence types based on MLST alleles and profile definitions using srst2 MLST ([`srst2 MLST`](https://github.com/katholt/srst2)) <br>
-6T. Kraken2? ()<br>
+6T. Kraken2 ()<br>
 
 ### Assembly
 --------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -30,9 +30,8 @@
 7A. Detect hypervirulence genes and find best matches to untranslated genes from a gene database using GAMMA ([`GAMMA`](https://github.com/rastanton/GAMMA))<br>
 9A. Rapid whole genome annotation using Prokka ([`PROKKA`](https://github.com/tseemann/prokka))<br>
 10A. Assess genome assembly for completeness using BUSCO ([`BUSCO`](https://busco.ezlab.org/))<br>
-11A. KRAKEN2?? ()<br>
+11A. KRAKEN2 ()<br>
 
-### Analysis of Assembled Reads >= 2000bps (Mention that we may use this instead of 1000bps currently in use)
     
 
 <!-- Add conditional statement to workflow nf files to differentiate-->
