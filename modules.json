@@ -21,6 +21,9 @@
             "fastqc": {
                 "git_sha": "49b18b1639f4f7104187058866a8fab33332bdfe"
             },
+            "gamma": {
+                "git_sha": "378fa5fbb47ed7c8211b01acb5cf1f66111c4e13"
+            },
             "gunzip": {
                 "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
             },
