@@ -51,6 +51,15 @@
             "quast": {
                 "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
             },
+            "seqkit/pair": {
+                "git_sha": "f0800157544a82ae222931764483331a81812012"
+            },
+            "seqkit/replace": {
+                "git_sha": "24f0bdd14ec32e0114aa6ee5337ddbd490ffd570"
+            },
+            "seqkit/stats": {
+                "git_sha": "0de6406217802e0bcbef89f7568b346904f5236c"
+            },
             "spades": {
                 "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
             }
