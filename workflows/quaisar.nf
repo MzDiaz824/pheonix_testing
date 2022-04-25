@@ -64,10 +64,10 @@ println"""/n
 // Check input path parameters to see if they exist
 def checkPathParamList = [ params.input, params.multiqc_config, params.fasta ]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
-
-// Check mandatory parameters
-if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
 */
+// Check mandatory parameters
+if (params.reads) { raw_reads = Channel.fromPath(params.reads) } else { exit 1, 'Please move your FASTQ files to the "FASTQs" folder!' }
+
 /*
 ========================================================================================
     CONFIG FILES
@@ -125,7 +125,9 @@ include { PROKKA } from '../modules/nf-core/modules/prokka/main'
 include { QUAST } from '../modules/nf-core/modules/quast/main'
 include { FASTANI } from '../modules/nf-core/modules/quast/main'
 include { FASTQC } from '../modules/nf-core/modules/fastqc/main'
-//include { GAMMA } from '../modules/nf-core/modules/GAMMA/main'
+include { GAMMA } from '../modules/nf-core/modules/gamma/main'
+include { SEQKIT_PAIR } from '../modules/nf-core/modules/seqkit/pair/main'
+
 //include { SRST2 } from '../modules/nf-core/modules/srst2/main'
 //PYANI DOES NOT EXIST AND THERE IS NO OPEN NF-CORE MODULE ISSUE SUGGESTING A BUILD IS IN PROGRESS
 //include { PYANI } from '../modules/nf-core/modules/pyani/main'
@@ -160,8 +162,9 @@ if (params.help){
 
 workflow QUAISAR {
 
-    
-    BBMAP_BBDUK (readPairs, phiX)
+    SEQKIT_PAIR ( raw_reads )
+
+    BBMAP_BBDUK ( SEQKIT_PAIR.out.reads, phiX)
     
     //process is called like a function in the workflow block
     //UNZIPFASTQ(tounzip)
@@ -191,7 +194,7 @@ workflow QUAISAR {
 
     MLST ( meta map, SPADES.out.scaffolds ) //scaffolds or contigs assembly fasta file to run MLST?
 
-    GAMMA ()//in progress
+    GAMMA ()
 
     KRAKEN2 ( meta map, SPADES.out.scaffolds, directory of database) //Assembled
 

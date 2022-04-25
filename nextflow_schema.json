@@ -27,9 +27,20 @@
                 "outdir": {
                     "type": "string",
                     "description": "Path to the output directory where the results will be saved.",
-                    "default": "./results",
+                    "default": "./MiSeqAnalysis",
                     "fa_icon": "fas fa-folder-open"
                 },
+                "reads": {
+                    "type": "string",
+                    "default": "'FASTQS/*_R{1,2}*.fastq.gz'",
+                    "description": "Path to folder where fastq files are stored."
+
+                },
+                "label": "Input files",
+                "usage": "Specified FastQ file location.",
+                "group": "Main Options",
+                
+
                 "email": {
                     "type": "string",
                     "description": "Email address for completion summary.",

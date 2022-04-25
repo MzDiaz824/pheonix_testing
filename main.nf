@@ -60,10 +60,10 @@ include { RAW_READ_QC } from '../subworkflows/local/rawQC'
 workflow NFCORE_QUAISAR {
     QUAISAR ()
 }
-Channel
+/*Channel
     .fromFilePairs( params.reads )
     //.ifEmpty { error "Cannot find any reads matching: ${params.reads}" }
-    .set { readPairs }
+    .set { readPairs }*/
 Channel
     .fromPath( params.phiX )
     .set { phiX }
