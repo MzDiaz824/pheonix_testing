@@ -5,7 +5,7 @@
 */
 
 //def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
-
+if (params.reads) { raw_reads = Channel.fromPath(params.reads) } else { exit 1, 'Please move your FASTQ files to the "FASTQs" folder!' }
 /*
 ========================================================================================
    Pipeline Details
@@ -65,8 +65,6 @@ println"""/n
 def checkPathParamList = [ params.input, params.multiqc_config, params.fasta ]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 */
-// Check mandatory parameters
-if (params.reads) { raw_reads = Channel.fromPath(params.reads) } else { exit 1, 'Please move your FASTQ files to the "FASTQs" folder!' }
 
 /*
 ========================================================================================
@@ -108,10 +106,9 @@ if (params.reads) { raw_reads = Channel.fromPath(params.reads) } else { exit 1, 
 
 // MODULE: Installed directly from nf-core/modules
 
-
-
 include { BBMAP_BBDUK } from '../modules/nf-core/modules/bbmap/bbduk/main'
 include { FASTP } from '../modules/nf-core/modules/fastp/main'
+include { FASTQC } from '../modules/nf-core/modules/fastqc/main'
 include { BLAST } from '../modules/nf-core/modules/blast/main'
 include { GUNZIP } from '../modules/nf-core/modules/gunzip/main'
 include { SPADES } from '../modules/nf-core/modules/spades/main'
@@ -124,7 +121,6 @@ include { MLST } from '../modules/nf-core/modules/mlst/main'
 include { PROKKA } from '../modules/nf-core/modules/prokka/main'
 include { QUAST } from '../modules/nf-core/modules/quast/main'
 include { FASTANI } from '../modules/nf-core/modules/quast/main'
-include { FASTQC } from '../modules/nf-core/modules/fastqc/main'
 include { GAMMA } from '../modules/nf-core/modules/gamma/main'
 include { SEQKIT_PAIR } from '../modules/nf-core/modules/seqkit/pair/main'
 
@@ -165,15 +161,16 @@ workflow QUAISAR {
     SEQKIT_PAIR ( raw_reads )
 
     BBMAP_BBDUK ( SEQKIT_PAIR.out.reads, phiX)
-    
-    //process is called like a function in the workflow block
-    //UNZIPFASTQ(tounzip)
 
     FASTP ( BBMAP_BBDUK.out.reads, true, true )
 
+    FASTQC ( FASTP.out.reads )
+
     KRAKEN2 ( meta map, readPairs, directory of database) //raw reads
 
-    SRST2 ( readPairs...) //TBD x 2 for AR and MLST
+    SRST2 ( FASTP.out..) //MLST
+
+    SRST2 ( ) //AR
 
     GUNZIP (  ) //confusing may use script I wrote
 

@@ -1,6 +1,7 @@
 process BBMAP_BBDUK {
     tag "$meta.id"
     label 'process_medium'
+    publishDir "$params.outdir/$project/$meta.id/removedAdapters"
 
     conda (params.enable_conda ? "bioconda::bbmap=38.90" : null)
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?

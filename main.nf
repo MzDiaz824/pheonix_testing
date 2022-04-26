@@ -54,19 +54,13 @@ include { QUAISAR } from '../workflows/quaisar'
 include { RAW_READ_QC } from '../subworkflows/local/rawQC'
 
 
-// WORKFLOW: Run main nf-core/quaisar analysis pipeline
+// WORKFLOW: Run assembled files only
 //
 
 workflow NFCORE_QUAISAR {
-    QUAISAR ()
+    
 }
-/*Channel
-    .fromFilePairs( params.reads )
-    //.ifEmpty { error "Cannot find any reads matching: ${params.reads}" }
-    .set { readPairs }*/
-Channel
-    .fromPath( params.phiX )
-    .set { phiX }
+
 //work on creating channels for dbs needed for processes in workflow
 Channel
     .fromPath(params.databases)
@@ -85,13 +79,12 @@ Channel
 */
 
 //
-// WORKFLOW: Execute a single named workflow for the pipeline
+// WORKFLOW: Default entry point
 // See: https://github.com/nf-core/rnaseq/issues/619
 //start Workflow if databases exist
 
     workflow {
-        NFCORE_QUAISAR ()
-        RAW_READ_QC (readPairs)
+        QUAISAR ()
     
 }
 

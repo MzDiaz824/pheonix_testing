@@ -1,6 +1,3 @@
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/DHQP/QuAISAR_Nextflow)
-
-
 ### Pipeline summary:
 -------------------------------------------------------------------------------------------------------------------------------------------------------
 <!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->
@@ -52,7 +49,7 @@
 
 
 
-![Workflow](https://github.com/MzDiaz824/QuAISAR_Nextflow/docs/images/WF.PNG?raw=true)
+![Workflow](r'docs/images/WF.PNG')
 
 ### Quick Start
 
