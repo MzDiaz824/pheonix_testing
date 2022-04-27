@@ -166,7 +166,7 @@ workflow QUAISAR {
 
     FASTQC ( FASTP.out.reads )
 
-    KRAKEN2 ( meta map, readPairs, directory of database) //raw reads
+    KRAKEN2 ( readPairs, directory of database) //raw reads
 
     SRST2 ( FASTP.out..) //MLST
 
@@ -174,28 +174,34 @@ workflow QUAISAR {
 
     GUNZIP (  ) //confusing may use script I wrote
 
+    //download a taxonomy database
+    KRONA ( )
+
     //FASTQC ( FASTP.out.reads )
 
-    SPADES ( meta map, FASTP.out.reads, directry/file for aa HMMS for guided mode?)
+    KRONA_KRONADB ( ) 
+
+    SPADES ( FASTP.out.reads, directry/file for aa HMMS for guided mode?)
 
     /*Questions re: quast 1. Whether to use the provided gff reference annotation file
     2. What genome GFF file to use. Has to contain at least a non-empty string dummy value.
     3. Should we use the provided fasta reference genome file?
-    4. Do we use scaffolds or contigs for the assembly file of interest?
     */
     QUAST( SPADES.out.scaffolds, SPADES.out.contigs, true, SPADES.out.gfa, true )
 
-    FASTANI ( SPADES.out. , SPADES.out.scaffolds , reference file for query) //does mash occur before this?
+    FASTANI ( SPADES.out.scaffolds, SPADES.out.contigs , reference file for query) //does mash occur before this?
 
-    MASH_DIST ( meta map, reference file, SPADES.out.scaffolds ) //where do these come from?
+    MASH_DIST ( reference file, SPADES.out.scaffolds ) //where do these reference files come from?
 
-    MLST ( meta map, SPADES.out.scaffolds ) //scaffolds or contigs assembly fasta file to run MLST?
+    MLST ( SPADES.out.scaffolds )
 
-    GAMMA ()
+    GAMMA ( SPADES.out.scaffolds )
+    
+    KRAKEN2_DB ( )
+    
+    KRAKEN2 ( SPADES.out.scaffolds, KRAKEN2_DB.out.db ) 
 
-    KRAKEN2 ( meta map, SPADES.out.scaffolds, directory of database) //Assembled
-
-    PROKKA ()
+    PROKKA ( SPADES.out.scaffolds )
 
     BUSCO () //TBD
     

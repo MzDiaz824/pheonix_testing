@@ -82,6 +82,26 @@
 
     ```
 
+## Utilizing QuAISAR from multiple entry points
+
+The nf-core/quaisar pipeline is designed to allow analysis of various file types. The commands below will allow users to change entry points depending on the file type available:
+
+1. Assembled Reads
+
+    ```console
+    nextflow run nf-core/quaisar -profile <docker/singularity/podman/shifter/charliecloud/conda/institute> -entry <spadestoend>
+
+2. Trimmed Reads
+
+    ```console
+    nextflow run nf-core/quaisar -profile <docker/singularity/podman/shifter/charliecloud/conda/institute> -entry <trimmed>
+
+3. Raw Read QC only
+
+    ```console
+    nextflow run nf-core/quaisar -profile <docker/singularity/podman/shifter/charliecloud/conda/institute> -entry <rawqc>
+
+4.  We may want to allow repeating individual steps when part of the process fails (as it has in the past)
 ## Documentation
 
 
