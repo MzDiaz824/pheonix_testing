@@ -3,14 +3,17 @@
     "homePage": "https://github.com/nf-core/quaisar",
     "repos": {
         "nf-core/modules": {
+            "bbmap/align": {
+                "git_sha": "897c33d5da084b61109500ee44c01da2d3e4e773"
+            },
             "bbmap/bbduk": {
                 "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
             },
-            "blast/blastn": {
+            "bbmap/index": {
                 "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
             },
-            "blast/makeblastdb": {
-                "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
+            "bbmap/pileup": {
+                "git_sha": "897c33d5da084b61109500ee44c01da2d3e4e773"
             },
             "custom/dumpsoftwareversions": {
                 "git_sha": "20d8250d9f39ddb05dfb437603aaf99b5c0b2b41"
@@ -36,14 +39,14 @@
             "krona/ktimporttaxonomy": {
                 "git_sha": "e20e57f90b6787ac9a010a980cf6ea98bd990046"
             },
-            "mash/dist": {
-                "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
-            },
             "mashtree": {
                 "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
             },
             "mlst": {
                 "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
+            },
+            "multiqc": {
+                "git_sha": "49b18b1639f4f7104187058866a8fab33332bdfe"
             },
             "prokka": {
                 "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
