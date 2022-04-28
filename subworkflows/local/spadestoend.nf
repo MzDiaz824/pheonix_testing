@@ -13,30 +13,40 @@ include { KRONA } from '../modules/nf-core/modules/krona/main'
 //local module
 include { KRAKEN2_DB } from '../modules/local/kraken2db'
 
+// database parameter checks
+
+if(params.gamma_db){
+    Channel
+        .fromPath( "${params.gamma_db}" )
+        .set { ch_gamma }
+} else {
+    ch_gamma = Channel.empty()
+}
+
+
 workflow SPADES_TO_END {
     
-    KRONA_KRONADB ( ) //fetch krona dbs
+    KRONA_KRONADB ( ) 
 
-    KRONA_KTIMPORTTAXONOMY ( Need map, KRONA_KRONADB.out.db, taxes.csv? (Nick to answer my question) ) 
-    //confirm taxes.csv is what we need for Krona
+    KRONA_KTIMPORTTAXONOMY ( Need map, KRONA_KRONADB.out.db, taxes.csv?  ) 
 
     SPADES ( FASTP.out.reads, directry/file for aa HMMS for guided mode?)
 
     QUAST( SPADES.out.scaffolds, SPADES.out.contigs, true, SPADES.out.gfa, true )
 
-    FASTANI ( SPADES.out.scaffolds, SPADES.out.scaffolds , reference file for query) //does mash occur before this?
+    FASTANI ( SPADES.out.scaffolds, SPADES.out.scaffolds , reference file for query)
 
-    MASH_DIST ( reference file?, SPADES.out.scaffolds ) //where do these reference files come from?
+    MASHTREE ( SPADES.out.scaffolds )
 
     MLST ( SPADES.out.scaffolds ) 
 
-    GAMMA ( SPADES.out.scaffolds )
+    GAMMA ( SPADES.out.scaffolds, ch_gamma )
 
-    KRAKEN2_DB ( )
+    KRAKEN2_DB (SPADES.out.scaffolds, KRAKEN2_DB.out.db )
 
     KRAKEN2 (SPADES.out.scaffolds, KRAKEN2_DB.out.db) 
 
     PROKKA ( SPADES.out.scaffolds )
 
-    BUSCO () //TBD
+    BUSCO () 
 }
