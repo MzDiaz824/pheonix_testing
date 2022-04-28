@@ -16,26 +16,9 @@ nextflow.enable.dsl = 2
     DEFINE VALUES THAT CAN BE OVERWRITTEN
 ========================================================================================
 */
-//FastQ files must be saved in the FASTQs folder
-//params.reads = "./FASTQs/*_R{1,2}.fastq.gz"
-//params.bulkFastqBase = "./MiSeqAnalysisFiles/reads2QC/*{R1,R2}_001.fastq"
-//params.fasta = WorkflowMain.getGenomeAttribute(params, 'fasta')
-/*=====================================================================================================================================
-                                                       Channels   
-====================================================================================================================================
-*/
-/*drag and drop files into supplied folder name FASTQs
-those files will be parsed and grouped as pairs
-Will need to add logic to support single reads as current s/u supports paired reads only*/
-Channel
-    .fromFilePairs("$baseDir/FASTQs/*_R{1,2}*.{fastq,fastq.gz,fq,fq.gz}")
-    //.ifEmpty { error "Cannot find any reads matching: ${params.reads}" }
-    .set { readPairs }
 
-Channel
-    .fromFilePairs( params.bulkFastqBase)
-    //.ifEmpty { error "Cannot find any reads matching: ${params.bulkFastqBase}" }
-    .set { fqPairs }
+//params.fasta = WorkflowMain.getGenomeAttribute(params, 'fasta')
+
 /*
 ========================================================================================
     VALIDATE & PRINT PARAMETER SUMMARY
@@ -62,10 +45,10 @@ workflow NFCORE_QUAISAR {
 }
 
 //work on creating channels for dbs needed for processes in workflow
-Channel
+/*Channel
     .fromPath(params.databases)
     .ifEmpty {exit 1, "There are no databases found: ${params.databases}"}
-    .set { dbs } //need to set up for each dbs
+    .set { dbs } //need to set up for each dbs*/
 //This means channel values are consumed serially one after another and the 
 //first empty channel cause the process execution to stop even if there are 
 //other values in other channels.
@@ -89,30 +72,6 @@ Channel
 }
 
 
-
-/*
-========================================================================================
-                                    PROCESSES
-========================================================================================
-*/
-//incase gunzip is problematic
-/*process UNZIPFASTQ {
-    tag "$name"
-    publishDir "$params.outdir/$name/"
-	publishDir "$params.outdir/reads2QC/", mode: 'copy'
-
-    input:
-    tuple val(name), file(data)
-
-  	output:
-    file "*.fastq"
-
-  	script:
-	  """
-	  gzip -c "${name}_R1_001.fastq.gz"  > "${name}_R1_001.fastq"
-	  gzip -c "${name}_R2_001.fastq.gz"  > "${name}_R2_001.fastq"
-	  """
- }*/
 workflow.onComplete {
 
    println ( workflow.success ? """
