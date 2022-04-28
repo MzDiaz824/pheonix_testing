@@ -6,6 +6,21 @@
 
 //def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
 if (params.reads) { raw_reads = Channel.fromPath(params.reads) } else { exit 1, 'Please move your FASTQ files to the "FASTQs" folder!' }
+
+if(params.gamma_db){
+    Channel
+        .fromPath( "${params.gamma_db}" )
+        .set { ch_gamma }
+} else {
+    ch_gamma = Channel.empty()
+}
+
+if (params.phiX) {
+    .fromPath( "${params.phiX}")
+    .set { ch_phiX }
+} else {
+    ch_phiX = Channel.empty()
+}
 /*
 ========================================================================================
    Pipeline Details
@@ -75,12 +90,7 @@ for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true
 //ch_multiqc_config        = file("$projectDir/assets/multiqc_config.yaml", checkIfExists: true)
 //ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config) : Channel.empty()
 
-/*
-========================================================================================
-    IMPORT LOCAL MODULES
-========================================================================================
-*/
-//include { UNZIPFASTQ } from '../modules/local/unzipfq/main'
+
 
 /*
 ========================================================================================
@@ -88,12 +98,7 @@ for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true
 ========================================================================================
 */
 
-//include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'
-//include { READ_RUN } from '../subworkflows/read_run'
-//include { ASSEMBLY_RUN } from '../subworkflows/assembly_run'
-//include { UPDATE_DB_DEPENDANTS } from '../subworkflows/update_DB_dependants'
-//include { UPDATE_DBS } from '../subworkflows/update_DBs'
-//
+
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
 //include { INPUT_CHECK } from '../subworkflows/local/input_check'
@@ -160,17 +165,17 @@ workflow QUAISAR {
 
     SEQKIT_PAIR ( raw_reads )
 
-    BBMAP_BBDUK ( SEQKIT_PAIR.out.reads, phiX)
+    BBMAP_BBDUK ( SEQKIT_PAIR.out.reads, ch_phiX)
 
     FASTP ( BBMAP_BBDUK.out.reads, true, true )
 
     FASTQC ( FASTP.out.reads )
 
-    KRAKEN2 ( readPairs, directory of database) //raw reads
+    KRAKEN2 ( FASTP.out.reads, KRAKEN2_DB.out.db) //raw reads
 
-    SRST2 ( FASTP.out..) //MLST
+    SRST2 ( FASTP.out..) //MLST being developed by Jill
 
-    SRST2 ( ) //AR
+    SRST2 ( ) //AR being developed by Jill
 
     GUNZIP (  ) //confusing may use script I wrote
 
@@ -191,19 +196,21 @@ workflow QUAISAR {
 
     FASTANI ( SPADES.out.scaffolds, SPADES.out.contigs , reference file for query) //does mash occur before this?
 
-    MASH_DIST ( reference file, SPADES.out.scaffolds ) //where do these reference files come from?
+    MASHTREE ( SPADES.out.scaffolds )
 
     MLST ( SPADES.out.scaffolds )
 
-    GAMMA ( SPADES.out.scaffolds )
+    GAMMA ( SPADES.out.scaffolds,  )
     
     KRAKEN2_DB ( )
     
     KRAKEN2 ( SPADES.out.scaffolds, KRAKEN2_DB.out.db ) 
 
-    PROKKA ( SPADES.out.scaffolds )
+    PROKKA ( SPADES.out.scaffolds ,)
 
-    BUSCO () //TBD
+    BUSCO_DB ( )
+    
+    BUSCO () 
     
 }
 
