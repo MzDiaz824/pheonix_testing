@@ -101,8 +101,8 @@ for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true
 
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-//include { INPUT_CHECK } from '../subworkflows/local/input_check'
-
+include { INPUT_CHECK } from '../subworkflows/local/input_check'
+include { BUSCO_QC } from '../subworkflows/local/busco_qc'
 /*
 ========================================================================================
     IMPORT NF-CORE MODULES/SUBWORKFLOWS
@@ -117,7 +117,8 @@ include { FASTQC } from '../modules/nf-core/modules/fastqc/main'
 include { BLAST } from '../modules/nf-core/modules/blast/main'
 include { GUNZIP } from '../modules/nf-core/modules/gunzip/main'
 include { SPADES } from '../modules/nf-core/modules/spades/main'
-include { KRAKEN2 } from '../modules/nf-core/modules/kraken2/kraken2/main'
+include { KRAKEN2 as KRAKEN2_RAW } from '../modules/nf-core/modules/kraken2/kraken2/main'
+include { KRAKEN2 as KRAKEN2_ASSEMBLED } from '../modules/nf-core/modules/kraken2/kraken2/main'
 include { KRONA } from '../modules/nf-core/modules/krona/main'
 include { QUAST } from '../modules/nf-core/modules/quast/main'
 include { MASHTREE } from '../modules/nf-core/modules/mashree/main'
@@ -132,8 +133,7 @@ include { SEQKIT_PAIR } from '../modules/nf-core/modules/seqkit/pair/main'
 //include { SRST2 } from '../modules/nf-core/modules/srst2/main'
 //PYANI DOES NOT EXIST AND THERE IS NO OPEN NF-CORE MODULE ISSUE SUGGESTING A BUILD IS IN PROGRESS
 //include { PYANI } from '../modules/nf-core/modules/pyani/main'
-//BUSCO build status TBD
-//include { BUSCO } from '../modules/nf-core/modules/busco/main'
+
 
 /*
 ========================================================================================
@@ -171,7 +171,7 @@ workflow QUAISAR {
 
     FASTQC ( FASTP.out.reads )
 
-    KRAKEN2 ( FASTP.out.reads, KRAKEN2_DB.out.db) //raw reads
+    KRAKEN2_RAW ( FASTP.out.reads, KRAKEN2_DB.out.db) //raw reads
 
     SRST2 ( FASTP.out..) //MLST being developed by Jill
 
@@ -204,13 +204,29 @@ workflow QUAISAR {
     
     KRAKEN2_DB ( )
     
-    KRAKEN2 ( SPADES.out.scaffolds, KRAKEN2_DB.out.db ) 
+    KRAKEN2_ASSEMBLED ( SPADES.out.scaffolds, KRAKEN2_DB.out.db ) 
 
     PROKKA ( SPADES.out.scaffolds ,)
-
-    BUSCO_DB ( )
     
-    BUSCO () 
+    if (!params.skip_busco){
+            /*
+            * BUSCO subworkflow: Quantitative measures for the assessment of genome assembly
+            */
+            ch_input_bins_busco = BINNING.out.bins.mix( BINNING.out.unbinned ).transpose()
+            BUSCO_QC (
+                ch_busco_db_file,
+                ch_busco_download_folder,
+                ch_input_bins_busco
+            )
+            ch_busco_summary = BUSCO_QC.out.summary
+            ch_busco_multiqc = BUSCO_QC.out.multiqc
+            ch_versions = ch_versions.mix(BUSCO_QC.out.versions.first())
+            // process information if BUSCO analysis failed for individual bins due to no matching genes
+            BUSCO_QC.out
+                .failed_bin
+                .splitCsv(sep: '\t')
+                .map { bin, error -> if (!bin.contains(".unbinned.")) busco_failed_bins[bin] = error }
+        } 
     
 }
 
