@@ -49,6 +49,7 @@ include { RAW_READ_QC } from '../subworkflows/local/rawQC'
 
     workflow {
         QUAISAR ( input )
+        RAW_READ_QC ( input )
     
 }
 
