@@ -36,28 +36,9 @@ WorkflowMain.initialise(workflow, params, log)
 include { QUAISAR } from '../workflows/quaisar'
 include { RAW_READ_QC } from '../subworkflows/local/rawQC'
 
-
-// WORKFLOW: Run assembled files only
-//
-
-workflow NFCORE_QUAISAR {
-    
-}
-
-//work on creating channels for dbs needed for processes in workflow
-/*Channel
-    .fromPath(params.databases)
-    .ifEmpty {exit 1, "There are no databases found: ${params.databases}"}
-    .set { dbs } //need to set up for each dbs*/
-//This means channel values are consumed serially one after another and the 
-//first empty channel cause the process execution to stop even if there are 
-//other values in other channels.
-/*if ( params.bbmap_adapters ){
-    bbmap_adapters = file("${params.bbmap_adapters}")
-}*/
 /*
 ========================================================================================
-    RUN ALL WORKFLOWS
+    RUN MAIN WORKFLOW
 ========================================================================================
 */
 
@@ -67,7 +48,7 @@ workflow NFCORE_QUAISAR {
 //start Workflow if databases exist
 
     workflow {
-        QUAISAR ()
+        QUAISAR ( input )
     
 }
 
