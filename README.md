@@ -49,7 +49,7 @@
 
 
 
-![Workflow](r'DHQP/QuAISAR_Nextflow/docs/images/WF.PNG')
+![Workflow](https://github.com/DHQP/QuAISAR_Nextflow/docs/images/WF.PNG)
 
 ### Quick Start
 
