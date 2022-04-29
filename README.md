@@ -49,7 +49,7 @@
 
 
 
-![Workflow](r'docs/images/WF.PNG')
+![Workflow](r'DHQP/QuAISAR_Nextflow/docs/images/WF.PNG')
 
 ### Quick Start
 
