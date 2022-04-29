@@ -21,6 +21,20 @@ if (params.phiX) {
 } else {
     ch_phiX = Channel.empty()
 }
+
+if(params.busco_reference){
+    ch_busco_db_file = Channel
+        .value(file( "${params.busco_reference}" ))
+} else {
+    ch_busco_db_file = Channel.empty()
+}
+
+if (params.busco_download_path) {
+    ch_busco_download_folder = Channel
+        .value(file( "${params.busco_download_path}" ))
+} else {
+    ch_busco_download_folder = Channel.empty()
+}
 /*
 ========================================================================================
    Pipeline Details
@@ -159,7 +173,7 @@ if (params.help){
 */
 
 // Info required for completion email and summary
-//def multiqc_report = []
+def multiqc_report = []
 
 workflow QUAISAR {
 
@@ -180,11 +194,9 @@ workflow QUAISAR {
     GUNZIP (  ) //confusing may use script I wrote
 
     //download a taxonomy database
+    KRONA_KRONADB ( )
+    
     KRONA ( )
-
-    //FASTQC ( FASTP.out.reads )
-
-    KRONA_KRONADB ( ) 
 
     SPADES ( FASTP.out.reads, directry/file for aa HMMS for guided mode?)
 
