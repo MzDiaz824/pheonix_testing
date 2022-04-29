@@ -144,7 +144,8 @@ include { FASTANI } from '../modules/nf-core/modules/quast/main'
 include { GAMMA } from '../modules/nf-core/modules/gamma/main'
 include { SEQKIT_PAIR } from '../modules/nf-core/modules/seqkit/pair/main'
 
-//include { SRST2 } from '../modules/nf-core/modules/srst2/main'
+//include { SRST2 as SRST2_AR} from '../modules/nf-core/modules/srst2/main'
+//include { SRST2 as SRST2_MLST} from '../modules/nf-core/modules/srst2/main'
 //PYANI DOES NOT EXIST AND THERE IS NO OPEN NF-CORE MODULE ISSUE SUGGESTING A BUILD IS IN PROGRESS
 //include { PYANI } from '../modules/nf-core/modules/pyani/main'
 
