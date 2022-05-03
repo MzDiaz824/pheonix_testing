@@ -186,9 +186,9 @@ fi
 # Grabs total possible reads from preQC counts if kraken was used on reads (pre assembly)
 if [[ "${list_file}" = *"/reads/"* ]]; then
 	# Checks for the existence of the preQC counts file to get total possible reads
-	if [[ -s "${SAMPDATADIR}/preQCcounts/${sample_name}_trimmed_counts.txt" ]]; then
+	if [[ -s "${SAMPDATADIR}/preQCcounts/${sample_name}_trimmed_counts_total.txt" ]]; then
 		# Pulls the total number of possible reads from the preQC counts file
-		file_reads=$(tail -n 1 "${SAMPDATADIR}/preQCcounts/${sample_name}_trimmed_counts.txt" | cut -d'	' -f13)
+		file_reads=$(tail -n 1 "${SAMPDATADIR}/preQCcounts/${sample_name}_trimmed_counts_total.txt" | cut -d'	' -f13)
 		# Calculates the true count of unclassified reads/contigs rather than the reported value from kraken
 		unclass_reads=$(( file_reads - classified_reads ))
 		# Calculates the percent of unclassified reads/contigs using the total possible reads

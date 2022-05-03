@@ -234,8 +234,8 @@ while IFS= read -r var || [ -n "$var" ]; do
 	# Q30_R1_[%]	Q30_R2_[%]	Total_Sequenced_[bp]	Total_Sequenced_[reads]
 	read_qc_info="N/A	N/A	N/A	N/A	N/A	N/A	N/A	N/A	N/A	N/A	N/A	N/A"
 	# If the counts file exists take the header line (the only one) and copy all but the first entry (which is the sample name) and store in an array
-	if [[ -s "${OUTDATADIR}/preQCcounts/${sample_name}_counts.txt" ]]; then
-		line=$(tail -n 1 "${OUTDATADIR}/preQCcounts/${sample_name}_counts.txt")
+	if [[ -s "${OUTDATADIR}/preQCcounts/${sample_name}_counts_raw.txt" ]]; then
+		line=$(tail -n 1 "${OUTDATADIR}/preQCcounts/${sample_name}_counts_raw.txt")
 		IFS='	' read -r -a qcs <<< "${line}"
 		read_qc_info=${qcs[@]:1}
 		#echo "${read_qc_info}"
@@ -361,8 +361,8 @@ while IFS= read -r var || [ -n "$var" ]; do
 
 	# Redo for trimmed read coverage
 	# Extract q30 reads from qcCounts to calculate average coverage as q30_reads/assembly_length
-	if [[ -s "${OUTDATADIR}/preQCcounts/${sample_name}_trimmed_counts.txt" ]]; then
-		line=$(tail -n 1 "${OUTDATADIR}/preQCcounts/${sample_name}_trimmed_counts.txt")
+	if [[ -s "${OUTDATADIR}/preQCcounts/${sample_name}_trimmed_counts_total.txt" ]]; then
+		line=$(tail -n 1 "${OUTDATADIR}/preQCcounts/${sample_name}_trimmed_counts_total.txt")
 		IFS='	' read -r -a qcs2 <<< "${line}"
 		read_qc_info_trimmed=${qcs2[@]:1}
 		#echo "${read_qc_info}"

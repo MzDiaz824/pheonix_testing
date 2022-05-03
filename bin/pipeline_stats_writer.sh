@@ -224,13 +224,13 @@ elif [[ -s "${OUTDATADIR}/Assembly/${sample_name}_scaffolds_trimmed.fasta" ]]; t
 
  if [[ "${run_type}" == "all" ]]; then
  	#Checking QC counts
- 	if [[ -s "${OUTDATADIR}/preQCcounts/${sample_name}_counts.txt" ]]; then
- 		reads_pre=$(tail -n1 "${OUTDATADIR}/preQCcounts/${sample_name}_counts.txt" | cut -d'	' -f13)
+ 	if [[ -s "${OUTDATADIR}/preQCcounts/${sample_name}_counts_raw.txt" ]]; then
+ 		reads_pre=$(tail -n1 "${OUTDATADIR}/preQCcounts/${sample_name}_counts_raw.txt" | cut -d'	' -f13)
  		pairs_pre=$((reads_pre/2))
- 		Q30_R1=$(tail -n1 "${OUTDATADIR}/preQCcounts/${sample_name}_counts.txt" | cut -d'	' -f10)
+ 		Q30_R1=$(tail -n1 "${OUTDATADIR}/preQCcounts/${sample_name}_counts_raw.txt" | cut -d'	' -f10)
  		Q30_R1_rounded=$(echo "${Q30_R1}"  | cut -d'.' -f2)
  		Q30_R1_rounded=$(echo "${Q30_R1_rounded::2}")
- 		Q30_R2=$(tail -n1 "${OUTDATADIR}/preQCcounts/${sample_name}_counts.txt" | cut -d'	' -f11)
+ 		Q30_R2=$(tail -n1 "${OUTDATADIR}/preQCcounts/${sample_name}_counts_raw.txt" | cut -d'	' -f11)
  		Q30_R2_rounded=$(echo "${Q30_R2}"  | cut -d'.' -f2)
  		Q30_R2_rounded=$(echo "${Q30_R2_rounded::2}")
  		if [[ "${reads_pre}" -le 1000000 ]]; then
@@ -259,9 +259,9 @@ elif [[ -s "${OUTDATADIR}/Assembly/${sample_name}_scaffolds_trimmed.fasta" ]]; t
  			printf "%-20s: %-8s : %s\\n" "Q30_R2%" "SUCCESS" "Q30_R2% at ${Q30_R2_rounded}% (Threshold is 70)"  >> "${OUTDATADIR}/${sample_name}_pipeline_stats.txt"
  		fi
  	else
- 		printf "%-20s: %-8s : %s\\n" "QC counts" "FAILED" "/preQCcounts/${sample_name}_counts.txt not found"  >> "${OUTDATADIR}/${sample_name}_pipeline_stats.txt"
- 		printf "%-20s: %-8s : %s\\n" "Q30_R1%" "FAILED" "/preQCcounts/${sample_name}_counts.txt not found"  >> "${OUTDATADIR}/${sample_name}_pipeline_stats.txt"
- 		printf "%-20s: %-8s : %s\\n" "Q30_R2%" "FAILED" "/preQCcounts/${sample_name}_counts.txt not found"  >> "${OUTDATADIR}/${sample_name}_pipeline_stats.txt"
+ 		printf "%-20s: %-8s : %s\\n" "QC counts" "FAILED" "/preQCcounts/${sample_name}_counts_raw.txt not found"  >> "${OUTDATADIR}/${sample_name}_pipeline_stats.txt"
+ 		printf "%-20s: %-8s : %s\\n" "Q30_R1%" "FAILED" "/preQCcounts/${sample_name}_counts_raw.txt not found"  >> "${OUTDATADIR}/${sample_name}_pipeline_stats.txt"
+ 		printf "%-20s: %-8s : %s\\n" "Q30_R2%" "FAILED" "/preQCcounts/${sample_name}_counts_raw.txt not found"  >> "${OUTDATADIR}/${sample_name}_pipeline_stats.txt"
  		status="FAILED"
  	fi
 
@@ -435,8 +435,8 @@ elif [[ -s "${OUTDATADIR}/Assembly/${sample_name}_scaffolds_trimmed.fasta" ]]; t
  	fi
 
  	#Checking QC counts after trimming
- 	if [[ -s "${OUTDATADIR}/preQCcounts/${sample_name}_trimmed_counts.txt" ]]; then
- 		reads_post=$(tail -n1 "${OUTDATADIR}/preQCcounts/${sample_name}_trimmed_counts.txt" | cut -d'	' -f13)
+ 	if [[ -s "${OUTDATADIR}/preQCcounts/${sample_name}_trimmed_counts_total.txt" ]]; then
+ 		reads_post=$(tail -n1 "${OUTDATADIR}/preQCcounts/${sample_name}_trimmed_counts_total.txt" | cut -d'	' -f13)
  		pairs_post=$((reads_post/2))
  		loss=$(echo "scale=2; 100*(${reads_pre} - ${reads_post}) / ${reads_pre}" | bc )
  		if [[ "${reads_post}" -le 500000 ]]; then
@@ -446,7 +446,7 @@ elif [[ -s "${OUTDATADIR}/Assembly/${sample_name}_scaffolds_trimmed.fasta" ]]; t
  			printf "%-20s: %-8s : %s\\n" "QC count after trim" "SUCCESS" "${reads_post} individual reads (${pairs_post} paired reads) after trim. ${loss}% loss"  >> "${OUTDATADIR}/${sample_name}_pipeline_stats.txt"
  		fi
  	else
- 		printf "%-20s: %-8s : %s\\n" "QC count after trim" "FAILED" "/preQCcounts/${sample_name}_trimmed_counts.txt not found"  >> "${OUTDATADIR}/${sample_name}_pipeline_stats.txt"
+ 		printf "%-20s: %-8s : %s\\n" "QC count after trim" "FAILED" "/preQCcounts/${sample_name}_trimmed_counts_total.txt not found"  >> "${OUTDATADIR}/${sample_name}_pipeline_stats.txt"
  		status="FAILED"
  	fi
 
@@ -1266,8 +1266,8 @@ elif [[ -s "${OUTDATADIR}/Assembly/${sample_name}_scaffolds_trimmed.fasta" ]]; t
  fi
 
  # check coverage
- if [[ -s "${OUTDATADIR}/preQCcounts/${sample_name}_counts.txt" ]]; then
- 	line=$(tail -n1 "${OUTDATADIR}/preQCcounts/${sample_name}_counts.txt")
+ if [[ -s "${OUTDATADIR}/preQCcounts/${sample_name}_counts_raw.txt" ]]; then
+ 	line=$(tail -n1 "${OUTDATADIR}/preQCcounts/${sample_name}_counts_raw.txt")
  	IFS='	' read -r -a qcs <<< "${line}"
  	read_qc_info=${qcs[@]:1}
  	# Extract q30 reads from qcCounts to calculate average coverage as q30_reads/assembly_length
@@ -1299,8 +1299,8 @@ elif [[ -s "${OUTDATADIR}/Assembly/${sample_name}_scaffolds_trimmed.fasta" ]]; t
  		status="FAILED"
  	fi
  fi
- if [[ -s "${OUTDATADIR}/preQCcounts/${sample_name}_trimmed_counts.txt" ]]; then
- 	line=$(tail -n1 "${OUTDATADIR}/preQCcounts/${sample_name}_trimmed_counts.txt")
+ if [[ -s "${OUTDATADIR}/preQCcounts/${sample_name}_trimmed_counts_total.txt" ]]; then
+ 	line=$(tail -n1 "${OUTDATADIR}/preQCcounts/${sample_name}_trimmed_counts_total.txt")
  	IFS='	' read -r -a qcs <<< "${line}"
  	read_qc_info=${qcs[@]:1}
  	# Extract q30 reads from qcCounts to calculate average coverage as q30_reads/assembly_length
