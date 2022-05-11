@@ -40,8 +40,6 @@ process PROKKA {
         $args \\
         --cpus $task.cpus \\
         --prefix $prefix \\
-        $proteins_opt \\
-        $prodigal_tf \\
         $fasta
 
     cat <<-END_VERSIONS > versions.yml
