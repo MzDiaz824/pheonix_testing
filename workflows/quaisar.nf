@@ -38,6 +38,7 @@ ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multi
 include { INPUT_CHECK } from '../subworkflows/local/input_check'
 include { SPADES_LOCAL } from '../modules/local/localspades'
 include { BUSCO        } from '../modules/local/busco'
+include { GAMMA_PREP   } from '../modules/local/gammaprep'
 
 /*
 ========================================================================================
@@ -61,7 +62,6 @@ include { FASTANI                           } from '../modules/nf-core/modules/f
 include { MLST                              } from '../modules/nf-core/modules/mlst/main'
 include { GAMMA as GAMMA_AR                 } from '../modules/nf-core/modules/gamma/main'
 include { PROKKA                            } from '../modules/nf-core/modules/prokka/main'
-//include { BUSCO                             } from '../modules/nf-core/modules/busco/main'
 include { GAMMA as GAMMA_REPL               } from '../modules/nf-core/modules/gamma/main'
 include { MASHTREE                          } from '../modules/nf-core/modules/mashtree/main'
 include { MULTIQC                           } from '../modules/nf-core/modules/multiqc/main'
@@ -158,13 +158,14 @@ workflow QUAISAR {
     )
     ch_versions = ch_versions.mix(MLST.out.versions)
 
-    //error: A DataflowVariable can only be assigned once. Use
-    //bind() to allow for equal values to be passed into already
-    //-bound variables.
-    //GAMMA_REPL (
-        //SPADES_LOCAL.out.scaffolds, params.path2db // params.gamdbpf
-    //)
-    //ch_versions = ch_versions.mix(GAMMA_REPL.out.versions)
+    GAMMA_PREP (
+        SPADES_LOCAL.out.scaffolds
+    )
+
+    GAMMA_REPL (
+        GAMMA_PREP.out.prepped, params.gamdbpf
+    )
+    ch_versions = ch_versions.mix(GAMMA_REPL.out.versions)
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
