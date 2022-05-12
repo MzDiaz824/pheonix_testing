@@ -81,6 +81,15 @@
     nextflow run nf-core/quaisar -profile <docker/singularity/podman/shifter/charliecloud/conda/institute> --input samplesheet.csv --genome GRCh37
 
     ```
+## Database Updates
+
+The nf-core/quaisar pipeline databases can be manually updated by implementing:
+
+```console
+    nextflow run nf-core/quaisar -profile <docker/singularity/podman/shifter/charliecloud/conda/institute> -entry <databaseupdates>
+```
+
+This is a work in progress and will be updated as the workflow is crafted.
 
 ## Utilizing QuAISAR from multiple entry points
 
