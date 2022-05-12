@@ -101,18 +101,36 @@ workflow QUAISAR {
 
     ch_versions = ch_versions.mix(FASTQCTRIMD.out.versions.first())
 
+    /*mlst_ch = FASTP.out.reads.map{
+        meta, meta1 ->
+        def fmeta = [:]
+        set meta.id
+        fmeta.id = meta.id
+        set meta.single_end
+        fmeta.single_end = meta.single_end
+        set meta.db
+        fmeta.db = "mlst"
+        [fmeta, FASTP.out.reads, params.ardb]
+        //.view()
+    }
+    mlst_ch.view()*/
+    /*SRST2_TRIMD_AR (
+        FASTP.out.reads.map{ meta, reads -> [ [id:meta.id, single_end:meta.single_end, db:'gene'], reads, params.ardb]}
+        //mlst_ch
+    )*/
+
     KRAKEN2_TRIMD (
         FASTP.out.reads, params.path2db, true, true
     )
 
-    ch_versions = ch_versions.mix(KRAKEN2_TRIMD.out.versions)
+   // ch_versions = ch_versions.mix(KRAKEN2_TRIMD.out.versions)
 
     //spades runs but the modules that require its input do
     //not recognize the spades output
     SPADES_LOCAL (
         FASTP.out.reads
     )
-    ch_versions = ch_versions.mix(SPADES_LOCAL.out.versions)
+    //ch_versions = ch_versions.mix(SPADES_LOCAL.out.versions)
 
     //ch_versions = ch_versions.mix(BUSCO_DB_PREPARATION.out.versions)
     //prokka_map = prokka_map.map{SPADES_LOCAL.out.scaffolds, }
@@ -135,7 +153,7 @@ workflow QUAISAR {
     MASHTREE (
         SPADES_LOCAL.out.scaffolds
     )
-    ch_versions = ch_versions.mix(KRAKEN2_ASMBLD.out.versions)
+    ch_versions = ch_versions.mix(MASHTREE.out.versions)
 
     FASTANI (
         SPADES_LOCAL.out.scaffolds, params.ani_db
