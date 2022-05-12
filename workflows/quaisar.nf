@@ -119,29 +119,6 @@ workflow QUAISAR {
     )
     ch_versions = ch_versions.mix(SPADES_LOCAL.out.versions)
 
-    //error: The sequence does not appear to be FASTA format
-    //(lacks a descriptor line '>')
-   // PROKKA (
-       // SPADES_LOCAL.out.scaffolds, [], []
-    //)
-    //ch_versions = ch_versions.mix(PROKKA.out.versions)
-
-    BUSCO (
-        SPADES_LOCAL.out.scaffolds, 'auto', [], []
-    )
-    ch_versions = ch_versions.mix(BUSCO.out.versions)
-
-    //QUAST (
-        //SPADES_LOCAL.out.scaffolds, SPADES_LOCAL.out.contigs, false, PROKKA.out.gff, true
-    //)
-    //ch_versions = ch_versions.mix(QUAST.out.versions)
-
-    //KRAKEN2_ASMBLD (
-        //SPADES_LOCAL.out.scaffolds, params.path2db, true, true
-    //)
-    //ch_versions = ch_versions.mix(KRAKEN2_ASMBLD.out.versions)
-
-
     //mashtree error: can't perform on a single file
     //MASHTREE (
         //FASTP.out.reads.map{ meta, reads -> [ [id:meta.id, single_end:meta.single_end], params.scaffolds]}
@@ -166,6 +143,26 @@ workflow QUAISAR {
         GAMMA_PREP.out.prepped, params.gamdbpf
     )
     ch_versions = ch_versions.mix(GAMMA_REPL.out.versions)
+
+    PROKKA (
+        GAMMA_PREP.out.prepped, [], []
+    )
+    ch_versions = ch_versions.mix(PROKKA.out.versions)
+
+    //QUAST (
+        //GAMMA_PREP.out.prepped, SPADES_LOCAL.out.contigs, false, PROKKA.out.gff, true
+    //)
+    //ch_versions = ch_versions.mix(QUAST.out.versions)
+
+    //KRAKEN2_ASMBLD (
+        //SPADES_LOCAL.out.scaffolds, params.path2db, true, true
+    //)
+    //ch_versions = ch_versions.mix(KRAKEN2_ASMBLD.out.versions)
+
+    BUSCO (
+        SPADES_LOCAL.out.scaffolds, 'auto', [], []
+    )
+    ch_versions = ch_versions.mix(BUSCO.out.versions)
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
