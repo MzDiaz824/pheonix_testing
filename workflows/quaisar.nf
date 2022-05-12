@@ -61,6 +61,7 @@ include { FASTANI                           } from '../modules/nf-core/modules/f
 include { MLST                              } from '../modules/nf-core/modules/mlst/main'
 include { GAMMA as GAMMA_AR                 } from '../modules/nf-core/modules/gamma/main'
 include { PROKKA                            } from '../modules/nf-core/modules/prokka/main'
+include { BUSCO                             } from '../modules/nf-core/modules/busco/main'
 include { GAMMA as GAMMA_REPL               } from '../modules/nf-core/modules/gamma/main'
 include { MASHTREE                          } from '../modules/nf-core/modules/mashtree/main'
 include { MULTIQC                           } from '../modules/nf-core/modules/multiqc/main'
@@ -101,19 +102,7 @@ workflow QUAISAR {
 
     ch_versions = ch_versions.mix(FASTQCTRIMD.out.versions.first())
 
-    /*mlst_ch = FASTP.out.reads.map{
-        meta, meta1 ->
-        def fmeta = [:]
-        set meta.id
-        fmeta.id = meta.id
-        set meta.single_end
-        fmeta.single_end = meta.single_end
-        set meta.db
-        fmeta.db = "mlst"
-        [fmeta, FASTP.out.reads, params.ardb]
-        //.view()
-    }
-    mlst_ch.view()*/
+    //pending module improvements
     /*SRST2_TRIMD_AR (
         FASTP.out.reads.map{ meta, reads -> [ [id:meta.id, single_end:meta.single_end, db:'gene'], reads, params.ardb]}
         //mlst_ch
@@ -123,37 +112,41 @@ workflow QUAISAR {
         FASTP.out.reads, params.path2db, true, true
     )
 
-   // ch_versions = ch_versions.mix(KRAKEN2_TRIMD.out.versions)
+    ch_versions = ch_versions.mix(KRAKEN2_TRIMD.out.versions)
 
-    //spades runs but the modules that require its input do
-    //not recognize the spades output
     SPADES_LOCAL (
         FASTP.out.reads
     )
-    //ch_versions = ch_versions.mix(SPADES_LOCAL.out.versions)
+    ch_versions = ch_versions.mix(SPADES_LOCAL.out.versions)
 
-    //ch_versions = ch_versions.mix(BUSCO_DB_PREPARATION.out.versions)
-    //prokka_map = prokka_map.map{SPADES_LOCAL.out.scaffolds, }
-    //if (!params.proteins)
-    PROKKA (
-        SPADES_LOCAL.out.scaffolds, [], []
-    )
-    ch_versions = ch_versions.mix(PROKKA.out.versions)
+    //error: The sequence does not appear to be FASTA format
+    //(lacks a descriptor line '>')
+    //PROKKA (
+        //SPADES_LOCAL.out.scaffolds, [], []
+    //)
+    //ch_versions = ch_versions.mix(PROKKA.out.versions)
 
-    QUAST (
-        SPADES_LOCAL.out.scaffolds, SPADES_LOCAL.out.contigs, false, PROKKA.out.gff, false
+    BUSCO (
+        SPADES_LOCAL.out.scaffolds, 'auto', [], params.busco_config
     )
-    ch_versions = ch_versions.mix(QUAST.out.versions)
+    ch_versions = ch_versions.mix(BUSCO.out.versions)
 
-    KRAKEN2_ASMBLD (
-        SPADES_LOCAL.out.scaffolds, params.path2db, true, true
-    )
-    ch_versions = ch_versions.mix(KRAKEN2_ASMBLD.out.versions)
+    //QUAST (
+        //SPADES_LOCAL.out.scaffolds, SPADES_LOCAL.out.contigs, false, PROKKA.out.gff, true
+    //)
+    //ch_versions = ch_versions.mix(QUAST.out.versions)
 
-    MASHTREE (
-        SPADES_LOCAL.out.scaffolds
-    )
-    ch_versions = ch_versions.mix(MASHTREE.out.versions)
+    //KRAKEN2_ASMBLD (
+        //SPADES_LOCAL.out.scaffolds, params.path2db, true, true
+    //)
+    //ch_versions = ch_versions.mix(KRAKEN2_ASMBLD.out.versions)
+
+
+    //mashtree error: can't perform on a single file
+    //MASHTREE (
+        //FASTP.out.reads.map{ meta, reads -> [ [id:meta.id, single_end:meta.single_end], params.scaffolds]}
+    //)
+    //ch_versions = ch_versions.mix(MASHTREE.out.versions)
 
     FASTANI (
         SPADES_LOCAL.out.scaffolds, params.ani_db
@@ -165,10 +158,13 @@ workflow QUAISAR {
     )
     ch_versions = ch_versions.mix(MLST.out.versions)
 
-    GAMMA_REPL (
-        SPADES_LOCAL.out.scaffolds, params.path2db // params.gamdbpf
-    )
-    ch_versions = ch_versions.mix(GAMMA_REPL.out.versions)
+    //error: A DataflowVariable can only be assigned once. Use
+    //bind() to allow for equal values to be passed into already
+    //-bound variables.
+    //GAMMA_REPL (
+        //SPADES_LOCAL.out.scaffolds, params.path2db // params.gamdbpf
+    //)
+    //ch_versions = ch_versions.mix(GAMMA_REPL.out.versions)
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
