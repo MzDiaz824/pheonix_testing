@@ -149,20 +149,26 @@ workflow QUAISAR {
     )
     ch_versions = ch_versions.mix(PROKKA.out.versions)
 
+    ch_quast = Channel.fromPath( "params.outdir/gamma/*.fa" )
+    ch_quast.view()
     //QUAST (
+        //ch_quast, [], false, PROKKA.out.gff, true
         //GAMMA_PREP.out.prepped, SPADES_LOCAL.out.contigs, false, PROKKA.out.gff, true
     //)
     //ch_versions = ch_versions.mix(QUAST.out.versions)
 
-    //KRAKEN2_ASMBLD (
-        //SPADES_LOCAL.out.scaffolds, params.path2db, true, true
-    //)
-    //ch_versions = ch_versions.mix(KRAKEN2_ASMBLD.out.versions)
+
+    ch_versions = ch_versions.mix(KRAKEN2_ASMBLD.out.versions)
 
     BUSCO (
         SPADES_LOCAL.out.scaffolds, 'auto', [], []
     )
     ch_versions = ch_versions.mix(BUSCO.out.versions)
+
+    //error kraken2: --paired requires positive and even number filename
+    KRAKEN2_ASMBLD (
+        SPADES_LOCAL.out.scaffolds, params.path2db, true, true
+    )
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
