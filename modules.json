@@ -3,41 +3,26 @@
     "homePage": "https://github.com/nf-core/quaisar",
     "repos": {
         "nf-core/modules": {
-            "bbmap/align": {
-                "git_sha": "897c33d5da084b61109500ee44c01da2d3e4e773"
-            },
             "bbmap/bbduk": {
                 "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
             },
-            "bbmap/index": {
-                "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
-            },
-            "bbmap/pileup": {
-                "git_sha": "897c33d5da084b61109500ee44c01da2d3e4e773"
-            },
             "custom/dumpsoftwareversions": {
                 "git_sha": "20d8250d9f39ddb05dfb437603aaf99b5c0b2b41"
+            },
+            "fastani": {
+                "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
             },
             "fastp": {
                 "git_sha": "d0a1cbb703a130c19f6796c3fce24fbe7dfce789"
             },
             "fastqc": {
-                "git_sha": "49b18b1639f4f7104187058866a8fab33332bdfe"
+                "git_sha": "9d0cad583b9a71a6509b754fdf589cbfbed08961"
             },
             "gamma": {
                 "git_sha": "378fa5fbb47ed7c8211b01acb5cf1f66111c4e13"
             },
-            "gunzip": {
-                "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
-            },
             "kraken2/kraken2": {
-                "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
-            },
-            "krona/kronadb": {
-                "git_sha": "e20e57f90b6787ac9a010a980cf6ea98bd990046"
-            },
-            "krona/ktimporttaxonomy": {
-                "git_sha": "e20e57f90b6787ac9a010a980cf6ea98bd990046"
+                "git_sha": "abe025677cdd805cc93032341ab19885473c1a07"
             },
             "mashtree": {
                 "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
@@ -46,7 +31,7 @@
                 "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
             },
             "multiqc": {
-                "git_sha": "49b18b1639f4f7104187058866a8fab33332bdfe"
+                "git_sha": "20d8250d9f39ddb05dfb437603aaf99b5c0b2b41"
             },
             "prokka": {
                 "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
@@ -54,17 +39,11 @@
             "quast": {
                 "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
             },
-            "seqkit/pair": {
-                "git_sha": "f0800157544a82ae222931764483331a81812012"
-            },
-            "seqkit/replace": {
-                "git_sha": "24f0bdd14ec32e0114aa6ee5337ddbd490ffd570"
-            },
-            "seqkit/stats": {
-                "git_sha": "0de6406217802e0bcbef89f7568b346904f5236c"
-            },
             "spades": {
                 "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
+            },
+            "srst2/srst2": {
+                "git_sha": "24dc2d21132b07b4c3d36c9836885427a5019b11"
             }
         }
     }

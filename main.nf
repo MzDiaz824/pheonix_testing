@@ -13,11 +13,11 @@ nextflow.enable.dsl = 2
 
 /*
 ========================================================================================
-    DEFINE VALUES THAT CAN BE OVERWRITTEN
+    GENOME PARAMETER VALUES
 ========================================================================================
 */
 
-//params.fasta = WorkflowMain.getGenomeAttribute(params, 'fasta')
+params.fasta = WorkflowMain.getGenomeAttribute(params, 'fasta')
 
 /*
 ========================================================================================
@@ -33,40 +33,31 @@ WorkflowMain.initialise(workflow, params, log)
 ========================================================================================
 */
 
-include { QUAISAR } from '../workflows/quaisar'
-include { RAW_READ_QC } from '../subworkflows/local/rawQC'
+include { QUAISAR } from './workflows/quaisar'
+
+//
+// WORKFLOW: Run main nf-core/quaisar analysis pipeline
+//
+workflow NFCORE_QUAISAR {
+    QUAISAR ()
+}
 
 /*
 ========================================================================================
-    RUN MAIN WORKFLOW
+    RUN ALL WORKFLOWS
 ========================================================================================
 */
 
 //
-// WORKFLOW: Default entry point
+// WORKFLOW: Execute a single named workflow for the pipeline
 // See: https://github.com/nf-core/rnaseq/issues/619
-//start Workflow if databases exist
-
-    workflow {
-        QUAISAR ( input )
-        RAW_READ_QC ( input )
-    
+//
+workflow {
+    NFCORE_QUAISAR ()
 }
 
-
-workflow.onComplete {
-
-   println ( workflow.success ? """
-       Pipeline execution summary
-       ---------------------------
-       Completed at: ${workflow.complete}
-       Duration    : ${workflow.duration}
-       Success     : ${workflow.success}
-       workDir     : ${workflow.workDir}
-       Exit status : ${workflow.exitStatus}
-       """ : """
-       Failed: ${workflow.errorReport}
-       Exit status : ${workflow.exitStatus}
-       """
-   )
-}
+/*
+========================================================================================
+    THE END
+========================================================================================
+*/

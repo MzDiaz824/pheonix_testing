@@ -1,8 +1,8 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema",
-    "$id": "https://raw.githubusercontent.com/nf-core/quaisarexternal/master/nextflow_schema.json",
-    "title": "nf-core/quaisarexternal pipeline parameters",
-    "description": "Nextflow pipeline for external users to run Quaisar",
+    "$id": "https://raw.githubusercontent.com/nf-core/quaisar/master/nextflow_schema.json",
+    "title": "nf-core/quaisar pipeline parameters",
+    "description": "TBD",
     "type": "object",
     "definitions": {
         "input_output_options": {
@@ -21,26 +21,15 @@
                     "pattern": "^\\S+\\.csv$",
                     "schema": "assets/schema_input.json",
                     "description": "Path to comma-separated file containing information about the samples in the experiment.",
-                    "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row. See [usage docs](https://nf-co.re/quaisarexternal/usage#samplesheet-input).",
+                    "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row. See [usage docs](https://nf-co.re/quaisar/usage#samplesheet-input).",
                     "fa_icon": "fas fa-file-csv"
                 },
                 "outdir": {
                     "type": "string",
                     "description": "Path to the output directory where the results will be saved.",
-                    "default": "./MiSeqAnalysis",
+                    "default": "./results",
                     "fa_icon": "fas fa-folder-open"
                 },
-                "reads": {
-                    "type": "string",
-                    "default": "'FASTQS/*_R{1,2}*.fastq.gz'",
-                    "description": "Path to folder where fastq files are stored."
-
-                },
-                "label": "Input files",
-                "usage": "Specified FastQ file location.",
-                "group": "Main Options",
-                
-
                 "email": {
                     "type": "string",
                     "description": "Email address for completion summary.",
@@ -113,12 +102,6 @@
                     "default": "https://raw.githubusercontent.com/nf-core/configs/master",
                     "hidden": true,
                     "help_text": "If you're running offline, Nextflow will not be able to fetch the institutional config files from the internet. If you don't need them, then this is not a problem. If you do need them, you should download the files from the repo and tell Nextflow where to find them with this parameter.",
-                    "fa_icon": "fas fa-users-cog"
-                },
-                "hostnames": {
-                    "type": "string",
-                    "description": "Institutional configs hostname.",
-                    "hidden": true,
                     "fa_icon": "fas fa-users-cog"
                 },
                 "config_profile_name": {
@@ -195,22 +178,6 @@
                     "fa_icon": "fas fa-question-circle",
                     "hidden": true
                 },
-                "publish_dir_mode": {
-                    "type": "string",
-                    "default": "copy",
-                    "description": "Method used to save pipeline results to output directory.",
-                    "help_text": "The Nextflow `publishDir` option specifies which intermediate files should be saved to the output directory. This option tells the pipeline what method should be used to move these files. See [Nextflow docs](https://www.nextflow.io/docs/latest/process.html#publishdir) for details.",
-                    "fa_icon": "fas fa-copy",
-                    "enum": [
-                        "symlink",
-                        "rellink",
-                        "link",
-                        "copy",
-                        "copyNoFollow",
-                        "move"
-                    ],
-                    "hidden": true
-                },
                 "email_on_fail": {
                     "type": "string",
                     "description": "Email address for completion summary, only when pipeline fails.",
@@ -271,13 +238,6 @@
                     "description": "Run this workflow with Conda. You can also use '-profile conda' instead of providing this parameter.",
                     "hidden": true,
                     "fa_icon": "fas fa-bacon"
-                },
-                "singularity_pull_docker_container": {
-                    "type": "boolean",
-                    "description": "Instead of directly downloading Singularity images for use with Singularity, force the workflow to pull and convert Docker containers instead.",
-                    "hidden": true,
-                    "fa_icon": "fas fa-toolbox",
-                    "help_text": "This may be useful for example if you are unable to directly pull Singularity containers to run the pipeline due to http/https proxy issues."
                 }
             }
         }
@@ -285,9 +245,10 @@
     "allOf": [
         {
             "$ref": "#/definitions/input_output_options"
-        },/*
+        },
+        {
             "$ref": "#/definitions/reference_genome_options"
-        },*/
+        },
         {
             "$ref": "#/definitions/institutional_config_options"
         },
@@ -299,310 +260,3 @@
         }
     ]
 }
-    /*{
-        "parameters": [
-            {
-                "name": "reads",
-                "label": "Input files",
-                "usage": "Specified FastQ file location.",
-                "group": "Main Options",
-                "default_value": "'FASTQS/*_R{1,2}*.fastq.gz'",
-                "render": "textfield",
-                "pattern": ".*\\*.*",
-                "type": "string"
-    
-            },
-            {
-                "name": "singleEnd",
-                "label": "Single-end Sequencing Input",
-                "usage": "Specifies the type of inputs (single end).",
-                "group": "Main Options",
-                "default_value": false,
-                "render": "check-box",
-                "type": "boolean"
-    
-            },
-            {
-                "name": "outdir",
-                "label": "Output directory",
-                "usage": "Designated storage of Quaisar pipeline output",
-                "group": "Main Options",
-                "default_value": "./MiSeqAnalysisFiles",
-                "render": "textfield",
-                "pattern": ".*",
-                "type": "string"
-            },
-            {
-                "name": "email",
-                "label": "User's email address",
-                "usage": "Email address provided by user that will recieve notice once pipeline completed",
-                "group": "Main Options",
-                "default_value": "",
-                "render": "textfield",
-                "pattern": "^$|(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$)",
-                "type": "string"
-            }, 
-            {
-                "name": "maxQuaisars",
-                "label": "Maximum quaisar submissions running",
-                "usage": "Stops pipeline from running when too many runs pending",
-                "group": "Defaults",
-                "default_value": 1000,
-                "render": "textfield",
-                "type": "integer"
-            },
-            {
-                "name": "name",
-                "label": "Custom name for a run",
-                "usage": "Helper variable",
-                "group": "Main Options",
-                "default_value": "",
-                "render": "none",
-                "pattern": ".*",
-                "type": "string"
-            },
-            {
-                "name": "help",
-                "label": "Help",
-                "usage": "Use to display the pipeline help message",
-                "group": "Defaults",
-                "default_value": false,
-                "render": "none",
-                "type": "boolean"
-            },
-            {
-                "name": "logs",
-                "label": "quaisarLogs",
-                "usage": "Directory where quaisar run logs are stored",
-                "group": "Defaults",
-                "default_value": "./quaisarLogs",
-                "render": "textfield",
-                "type": "string"
-            },
-            {
-                "name": "massSubs",
-                "label": "massSubs",
-                "usage": "Temporary directory for mass submissions",
-                "group": "Defaults",
-                "default_value": "./massSubs",
-                "render": "textfield",
-                "type": "string"
-            },
-            {
-                "name": "databases",
-                "label": "Databases",
-                "usage": "Directory where quaisar databases are stored",
-                "group": "Defaults",
-                "default_value": "./databases",
-                "render": "textfield",
-                "type": "string"
-            },
-            {
-                "name": "phred",
-                "label": "PhredScale",
-                "usage": "Phred scoring scale to be used",
-                "group": "Defaults",
-                "default_value": 33,
-                "render": "textfield",
-                "type": "integer"
-            },
-            {
-                "name": "bbdukMem",
-                "label": "BbdukMem",
-                "usage": "Memory needed to run BBDUK",
-                "group": "Defaults",
-                "default_value": "Xmx20g",
-                "render": "textfield",
-                "type": "string"
-            },
-            {
-                "name": "bbKmer",
-                "label": "BbdukKmer",
-                "usage": "Kmer size for BBDUK",
-                "group": "Defaults",
-                "default_value": 31,
-                "render": "textfield",
-                "type": "integer"
-            },
-            {
-                "name": "bbHDist",
-                "label": "BbdukHDistance",
-                "usage": "Hamming distance",
-                "group": "Defaults",
-                "default_value": 1,
-                "render": "textfield",
-                "type": "integer"
-            },
-            {
-                "name": "bbdukPhi",
-                "label": "BbdukPhiSeq",
-                "usage": "Location of phiX Sequences for BBDUK",
-                "group": "Defaults",
-                "default_value": "./databases/phiX.fasta",
-                "render": "textfield",
-                "type": "string"
-            },
-            {
-                "name": "trimEnd",
-                "label": "TrimmomaticEnds",
-                "usage": "Designates whether trimmomatic trimming paired or single ends",
-                "group": "Advanced",
-                "default_value": "PE",
-                "render": "textfield",
-                "type": "string"
-            },
-            {
-                "name": "trimPhred",
-                "label": "TrimmomsaticPhred",
-                "usage": "Trimmomatic Phred scoring scale",
-                "group": "Defaults",
-                "default_value": "phred$phred", --come back to this
-                "render": "textfield",
-                "type": "string"
-            },
-            {
-                "name": "trimAdaptrs",
-                "label": "TrimAdapters",
-                "usage": "Location of Adapter FASTA file used for trimming",
-                "group": "Defaults",
-                "default_value": "./databases/adapters/fasta",
-                "render": "textfield",
-                "type": "string"
-            },
-            {
-                "name": "trimWindowSz",
-                "label": "TrimWindowSize",
-                "usage": "Trim window size",
-                "group": "Defaults",
-                "default_value": 20,
-                "render": "textfield",
-                "type": "integer"
-            },
-            {
-                "name": "trimWinQual",
-                "label": "TrimWindowQuality",
-                "usage": "Trim window quality",
-                "group": "Defaults",
-                "default_value": 30,
-                "render": "textfield",
-                "type": "integer"
-            },
-            {
-                "name": "trimWinLd",
-                "label": "TrimWindowLeading",
-                "usage": "Minimum quality to keep a read",
-                "group": "Defaults",
-                "default_value": 20,
-                "render": "textfield",
-                "type": "integer"
-            },
-            {
-                "name": "trimWinTrl",
-                "label": "TrimWindowTrailing",
-                "usage": "Minimum quality to keep a read",
-                "group": "Defaults",
-                "default_value": 20,
-                "render": "textfield",
-                "type": "integer"
-            },
-            {
-                "name": "trimMinLen",
-                "label": "TrimMinLength",
-                "usage": "Minimum length to keep a read",
-                "group": "Defaults",
-                "default_value": 50,
-                "render": "textfield",
-                "type": "integer"
-            },
-            {
-                "name": "spPhr",
-                "label": "SpadesPhredOffset",
-                "usage": "Phred quality offset based on scoring",
-                "group": "Defaults",
-                "default_value": 33,
-                "render": "textfield",
-                "type": "integer"
-            },
-            {
-                "name": "spMem",
-                "label": "SpadesMaxMemory",
-                "usage": "Max memory in Gbs",
-                "group": "Defaults",
-                "default_value": 32,
-                "render": "textfield",
-                "type": "integer"
-            },
-            {
-                "name": "spCovCut",
-                "label": "SpadesCoverageCutoff",
-                "usage": "Coverage threshold",
-                "group": "Defaults",
-                "default_value": "auto",
-                "render": "textfield",
-                "type": "string"
-            },
-            {
-                "name": "maxAniSamps",
-                "label": "MaxAniSamples",
-                "usage": "Maximum number of samples (excluding source sample) to keep for mash tree",
-                "group": "Defaults",
-                "default_value": 20,
-                "render": "textfield",
-                "type": "integer"
-            },
-            {
-                "name": "aniCovThr",
-                "label": "AniCoverageThreshold",
-                "usage": "ANI coverage threshold",
-                "group": "Defaults",
-                "default_value": 70,
-                "render": "textfield",
-                "type": "integer"
-            },
-            {
-                "name": "unclassFlag",
-                "label": "UnclassifiedFlag",
-                "usage": "Percent unclassified reads can not be above this value",
-                "group": "Defaults",
-                "default_value": 30,
-                "render": "textfield",
-                "type": "integer"
-            },
-            {
-                "name": "comboThr",
-                "label": "CombinationThreshold",
-                "usage": "Kraken coverage threshold",
-                "group": "Defaults",
-                "default_value": 25,
-                "render": "textfield",
-                "type": "integer"
-            },
-            {
-                "name": "k2db",
-                "label": "Kraken2Database",
-                "usage": "Drectory where Kraken2 is stored",
-                "group": "Defaults",
-                "default_value": 70,
-                "render": "textfield",
-                "type": "integer"
-            },
-            {
-                "name": "totalTime",
-                "label": "Total Time",
-                "usage": "The length of time that has elapsed since the pipeline started",
-                "group": "Defaults",
-                "default_value": "0d",
-                "render": "textfield",
-                "type": "string"
-            },
-            {
-                "name": "saveReads",
-                "label": "Save Reads",
-                "usage": "Save the reads in the appropriate directory",
-                "group": "Defaults",
-                "default_value": "check-box",
-                "render": false,
-                "type": "boolean"
-            }
-        ]
-    }*/

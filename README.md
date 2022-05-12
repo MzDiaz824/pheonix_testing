@@ -4,7 +4,7 @@
 
 1. PhiX adapter trimming and filtering of reads using BBDuK ([`BBDuK`](https://github.com/BioInfoTools/BBMap))
 2. Read filtering, adapter trimming, quality profiling and base correction using fastp ([`fastp`](https://github.com/OpenGene/fastp))
-3. Raw Reads QC Assessment specifics found in "QC Summary by Read Processing State" section 
+3. Raw Reads QC Assessment specifics found in "QC Summary by Read Processing State" section
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -32,7 +32,7 @@
 10A. Assess genome assembly for completeness using BUSCO ([`BUSCO`](https://busco.ezlab.org/))<br>
 11A. KRAKEN2 ()<br>
 
-    
+
 
 <!-- Add conditional statement to workflow nf files to differentiate-->
 ### Format Results of Analysis
@@ -49,7 +49,7 @@
 
 
 
-![Workflow](https://github.com/DHQP/QuAISAR_Nextflow/docs/images/WF.PNG?raw=true) 
+![Workflow](docs/images/coreWF.PNG)
 
 ### Quick Start
 
