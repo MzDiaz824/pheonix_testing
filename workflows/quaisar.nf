@@ -37,7 +37,7 @@ ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multi
 //
 include { INPUT_CHECK } from '../subworkflows/local/input_check'
 include { SPADES_LOCAL } from '../modules/local/localspades'
-
+include { BUSCO        } from '../modules/local/busco'
 
 /*
 ========================================================================================
@@ -61,7 +61,7 @@ include { FASTANI                           } from '../modules/nf-core/modules/f
 include { MLST                              } from '../modules/nf-core/modules/mlst/main'
 include { GAMMA as GAMMA_AR                 } from '../modules/nf-core/modules/gamma/main'
 include { PROKKA                            } from '../modules/nf-core/modules/prokka/main'
-include { BUSCO                             } from '../modules/nf-core/modules/busco/main'
+//include { BUSCO                             } from '../modules/nf-core/modules/busco/main'
 include { GAMMA as GAMMA_REPL               } from '../modules/nf-core/modules/gamma/main'
 include { MASHTREE                          } from '../modules/nf-core/modules/mashtree/main'
 include { MULTIQC                           } from '../modules/nf-core/modules/multiqc/main'
@@ -121,13 +121,13 @@ workflow QUAISAR {
 
     //error: The sequence does not appear to be FASTA format
     //(lacks a descriptor line '>')
-    //PROKKA (
-        //SPADES_LOCAL.out.scaffolds, [], []
+   // PROKKA (
+       // SPADES_LOCAL.out.scaffolds, [], []
     //)
     //ch_versions = ch_versions.mix(PROKKA.out.versions)
 
     BUSCO (
-        SPADES_LOCAL.out.scaffolds, 'auto', [], params.busco_config
+        SPADES_LOCAL.out.scaffolds, 'auto', [], []
     )
     ch_versions = ch_versions.mix(BUSCO.out.versions)
 
@@ -149,7 +149,7 @@ workflow QUAISAR {
     //ch_versions = ch_versions.mix(MASHTREE.out.versions)
 
     FASTANI (
-        SPADES_LOCAL.out.scaffolds, params.ani_db
+        SPADES_LOCAL.out.scaffolds, params.ardb
     )
     ch_versions = ch_versions.mix(FASTANI.out.versions)
 
