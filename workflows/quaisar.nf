@@ -37,24 +37,8 @@ ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multi
 //
 include { INPUT_CHECK } from '../subworkflows/local/input_check'
 include { SPADES_LOCAL } from '../modules/local/localspades'
-//include { SRST2_PREP } from '../modules/local/srst2prep'
-//include { BUSCO_QC            } from '../subworkflows/local/busco_qc'              addParams( busco_db_options: params.modules['busco_db_prep'], busco_options: params.modules['busco'], busco_save_download_options: params.modules['busco_save_download'], busco_plot_options: params.modules['busco_plot'], busco_summary_options: params.modules['busco_summary'])
 
 
-if(params.busco_reference){
-    Channel
-        .value(file( "${params.busco_reference}" ))
-        .set { ch_busco_db_file }
-} else {
-    ch_busco_db_file = Channel.empty()
-}
-if (params.busco_download_path) {
-    Channel
-        .value(file( "${params.busco_download_path}" ))
-        .set { ch_busco_download_folder }
-} else {
-    ch_busco_download_folder = Channel.empty()
-}
 /*
 ========================================================================================
     IMPORT NF-CORE MODULES/SUBWORKFLOWS
@@ -80,9 +64,7 @@ include { PROKKA                            } from '../modules/nf-core/modules/p
 include { GAMMA as GAMMA_REPL               } from '../modules/nf-core/modules/gamma/main'
 include { MASHTREE                          } from '../modules/nf-core/modules/mashtree/main'
 include { MULTIQC                           } from '../modules/nf-core/modules/multiqc/main'
-include { CUSTOM_DUMPSOFTWAREVERSIONS       } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'
-
-/*
+include { CUSTOM_DUMPSOFTWAREVERSIONS       } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'/*
 ========================================================================================
     RUN MAIN WORKFLOW
 ========================================================================================
@@ -95,6 +77,7 @@ workflow QUAISAR {
 
     ch_versions = Channel.empty()
 
+    //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
     //
     INPUT_CHECK (
@@ -124,44 +107,6 @@ workflow QUAISAR {
 
     ch_versions = ch_versions.mix(KRAKEN2_TRIMD.out.versions)
 
-    //below meta map update brings in <DataflowBroadcast around DataflowStream[?],>
-    //in between file name and db name
-    ar_ch  =  FASTP.out.reads.map{
-                meta, meta1 ->
-                def fmeta = [:]
-                set meta.id
-                fmeta.id = meta.id
-                set meta.single_end
-                fmeta.single_end = meta.single_end
-                set meta.db
-                fmeta.db = "gene"
-                [fmeta, meta1, FASTP.out.reads, params.path2db] //params.ardb]
-            }
-            //.view()
-    //cardinality error occurs using mapping above
-    /*SRST2_TRIMD_AR (
-        ar_ch
-    )
-    ch_versions = ch_versions.mix(SRST2_TRIMD_AR.out.versions)*/
-
-    //need to know what db is used
-    mlst_ch  =  FASTP.out.reads.map{
-                meta, meta1 ->
-                def fmeta = [:]
-                set meta.id
-                fmeta.id = meta.id
-                set meta.single_end
-                fmeta.single_end = meta.single_end
-                set meta.db
-                fmeta.db = "mlst"
-                [fmeta, meta1, FASTP.out.reads, params.path2db] // params.ardb]
-            }
-
-    /*SRST2_TRIMD_MLST (
-        mlst_ch
-    )
-    ch_versions = ch_versions.mix(SRST2_TRIMD_MLST.out.versions)*/
-
     //spades runs but the modules that require its input do
     //not recognize the spades output
     SPADES_LOCAL (
@@ -176,27 +121,6 @@ workflow QUAISAR {
         SPADES_LOCAL.out.scaffolds, [], []
     )
     ch_versions = ch_versions.mix(PROKKA.out.versions)
-
-    /*if (!params.skip_busco){
-            /*
-            * BUSCO subworkflow: Quantitative measures for the assessment of genome assembly
-            */
-            /*BUSCO_QC (
-                ch_busco_db_file,
-                ch_busco_download_folder,
-                PROKKA.out.faa
-                //METABAT2_BINNING.out.bins.transpose()
-            )
-            //ch_busco_summary = BUSCO_QC.out.summary
-            //ch_busco_multiqc = BUSCO_QC.out.multiqc
-            //ch_software_versions = ch_software_versions.mix(BUSCO_QC.out.version.first().ifEmpty(null))
-            // process information if BUSCO analysis failed for individual bins due to no matching genes
-            BUSCO_QC.out
-                .failed_bin
-                .splitCsv(sep: '\t')
-                .map { bin, error -> if (!bin.contains(".unbinned.")) busco_failed_bins[bin] = error }
-        }*/
-    //ch_versions = ch_versions.mix(BUSCO_QC.out.versions)
 
     QUAST (
         SPADES_LOCAL.out.scaffolds, SPADES_LOCAL.out.contigs, false, PROKKA.out.gff, false
@@ -223,16 +147,10 @@ workflow QUAISAR {
     )
     ch_versions = ch_versions.mix(MLST.out.versions)
 
-    /*GAMMA_AR (
-        SPADES_LOCAL.out.scaffolds, params.path2db //will this run like kraken2 where it will pull all dbs?
-    )*/
-
-
     GAMMA_REPL (
         SPADES_LOCAL.out.scaffolds, params.path2db // params.gamdbpf
     )
     ch_versions = ch_versions.mix(GAMMA_REPL.out.versions)
-
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
