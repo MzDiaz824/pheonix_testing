@@ -1,99 +1,21 @@
 /*
 ========================================================================================
-    PARAMETERS & CHANNELS
+    VALIDATE INPUTS
 ========================================================================================
 */
 
-//def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
-if (params.reads) { raw_reads = Channel.fromPath(params.reads) } else { exit 1, 'Please move your FASTQ files to the "FASTQs" folder!' }
+def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
 
-if(params.gamma_db){
-    Channel
-        .fromPath( "${params.gamma_db}" )
-        .set { ch_gamma }
-} else {
-    ch_gamma = Channel.empty()
-}
-
-if (params.phiX) {
-    .fromPath( "${params.phiX}")
-    .set { ch_phiX }
-} else {
-    ch_phiX = Channel.empty()
-}
-
-if(params.busco_reference){
-    ch_busco_db_file = Channel
-        .value(file( "${params.busco_reference}" ))
-} else {
-    ch_busco_db_file = Channel.empty()
-}
-
-if (params.busco_download_path) {
-    ch_busco_download_folder = Channel
-        .value(file( "${params.busco_download_path}" ))
-} else {
-    ch_busco_download_folder = Channel.empty()
-}
-/*
-========================================================================================
-   Pipeline Details
-========================================================================================
-*/
-
-println"""/n
-         Q U A I S A R - H - N F   P I P E L I N E
-         ===================================
-         Quaisar Description here
-		 Author: Maria Diaz 
-		 Email: lex0@cdc.gov
-		 Version: 1.0.0
-		""".stripIndent()
-println"""/n
-         =====================================================================================================================================
-                                                       U S A G E   
-         =====================================================================================================================================
-		 reads        : ${params.reads}
-         outdir       : ${params.outdir}
-            """.stripIndent()
-//documenting what versions we need
-/*println"""/n
-         =====================================================================================================================================
-                                                       T O O L S : P R O C E S S E S  
-         =====================================================================================================================================
-*/
-
-
-/*def quaisHelp() {
-	log.info """
-	Usage 1: nextflow run quaisar.nf 
-	
-	Filepath Options:
-	--reads 			Enter as 'path_to_reads/*_R{1,2}.fastq.gz'
-
-	Main Options:
-	--outdir			Directory where results will be saved.
-	--email				An e-mail address that will receive the summary.
-	--name				Name chosen to represent the current pipeline run.
-
-	Default Directories:
-	./FASTQs                                Location to drag and drop FASTQs to be analyzed.
-    ./MiSeqAnalysisFiles/config.sh			Path to directory to store config.sh file for individual run.
-	./MiSeqAnalysisFiles					Path to Quaisar output folders.
-	./quaisarLogs							Directory where quaisar run logs are stored.
-	./massSubs								Temporary directory for mass submissions.		
-	""".stripIndent()
-}*/
-
-
-
-/*WorkflowQuaisar.initialise(params, log)
+// Validate input parameters
+WorkflowQuaisar.initialise(params, log)
 
 // TODO nf-core: Add all file path parameters for the pipeline to the list below
 // Check input path parameters to see if they exist
 def checkPathParamList = [ params.input, params.multiqc_config, params.fasta ]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
-*/
+
+// Check mandatory parameters
+if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
 
 /*
 ========================================================================================
@@ -101,75 +23,68 @@ for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true
 ========================================================================================
 */
 
-//ch_multiqc_config        = file("$projectDir/assets/multiqc_config.yaml", checkIfExists: true)
-//ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config) : Channel.empty()
-
-
+ch_multiqc_config        = file("$projectDir/assets/multiqc_config.yaml", checkIfExists: true)
+ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config) : Channel.empty()
 
 /*
 ========================================================================================
-    IMPORT LOCAL SUBWORKFLOWS
+    IMPORT LOCAL MODULES/SUBWORKFLOWS
 ========================================================================================
 */
 
-
+//
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
 include { INPUT_CHECK } from '../subworkflows/local/input_check'
-include { BUSCO_QC } from '../subworkflows/local/busco_qc'
+include { SPADES_LOCAL } from '../modules/local/localspades'
+//include { SRST2_PREP } from '../modules/local/srst2prep'
+//include { BUSCO_QC            } from '../subworkflows/local/busco_qc'              addParams( busco_db_options: params.modules['busco_db_prep'], busco_options: params.modules['busco'], busco_save_download_options: params.modules['busco_save_download'], busco_plot_options: params.modules['busco_plot'], busco_summary_options: params.modules['busco_summary'])
+
+
+if(params.busco_reference){
+    Channel
+        .value(file( "${params.busco_reference}" ))
+        .set { ch_busco_db_file }
+} else {
+    ch_busco_db_file = Channel.empty()
+}
+if (params.busco_download_path) {
+    Channel
+        .value(file( "${params.busco_download_path}" ))
+        .set { ch_busco_download_folder }
+} else {
+    ch_busco_download_folder = Channel.empty()
+}
 /*
 ========================================================================================
     IMPORT NF-CORE MODULES/SUBWORKFLOWS
 ========================================================================================
 */
 
+//
 // MODULE: Installed directly from nf-core/modules
-
-include { BBMAP_BBDUK } from '../modules/nf-core/modules/bbmap/bbduk/main'
-include { FASTP } from '../modules/nf-core/modules/fastp/main'
-include { FASTQC } from '../modules/nf-core/modules/fastqc/main'
-include { BLAST } from '../modules/nf-core/modules/blast/main'
-include { GUNZIP } from '../modules/nf-core/modules/gunzip/main'
-include { SPADES } from '../modules/nf-core/modules/spades/main'
-include { KRAKEN2 as KRAKEN2_RAW } from '../modules/nf-core/modules/kraken2/kraken2/main'
-include { KRAKEN2 as KRAKEN2_ASSEMBLED } from '../modules/nf-core/modules/kraken2/kraken2/main'
-include { KRONA } from '../modules/nf-core/modules/krona/main'
-include { QUAST } from '../modules/nf-core/modules/quast/main'
-include { MASHTREE } from '../modules/nf-core/modules/mashree/main'
-include { MASH_DIST } from '../modules/nf-core/modules/mash/dist/main'
-include { MLST } from '../modules/nf-core/modules/mlst/main'
-include { PROKKA } from '../modules/nf-core/modules/prokka/main'
-include { QUAST } from '../modules/nf-core/modules/quast/main'
-include { FASTANI } from '../modules/nf-core/modules/quast/main'
-include { GAMMA } from '../modules/nf-core/modules/gamma/main'
-include { SEQKIT_PAIR } from '../modules/nf-core/modules/seqkit/pair/main'
-
-//include { SRST2 as SRST2_AR} from '../modules/nf-core/modules/srst2/main'
-//include { SRST2 as SRST2_MLST} from '../modules/nf-core/modules/srst2/main'
-//PYANI DOES NOT EXIST AND THERE IS NO OPEN NF-CORE MODULE ISSUE SUGGESTING A BUILD IS IN PROGRESS
-//include { PYANI } from '../modules/nf-core/modules/pyani/main'
-
+//
+include { BBMAP_BBDUK                       } from '../modules/nf-core/modules/bbmap/bbduk/main'
+include { FASTP                             } from '../modules/nf-core/modules/fastp/main'
+include { FASTQC as FASTQCTRIMD             } from '../modules/nf-core/modules/fastqc/main'
+include { SRST2_SRST2 as SRST2_TRIMD_AR     } from '../modules/nf-core/modules/srst2/srst2/main'
+include { SRST2_SRST2 as SRST2_TRIMD_MLST   } from '../modules/nf-core/modules/srst2/srst2/main'
+include { KRAKEN2_KRAKEN2 as KRAKEN2_TRIMD  } from '../modules/nf-core/modules/kraken2/kraken2/main'
+include { KRAKEN2_KRAKEN2 as KRAKEN2_ASMBLD } from '../modules/nf-core/modules/kraken2/kraken2/main'
+include { SPADES                            } from '../modules/nf-core/modules/spades/main'
+include { QUAST                             } from '../modules/nf-core/modules/quast/main'
+include { FASTANI                           } from '../modules/nf-core/modules/fastani/main'
+include { MLST                              } from '../modules/nf-core/modules/mlst/main'
+include { GAMMA as GAMMA_AR                 } from '../modules/nf-core/modules/gamma/main'
+include { PROKKA                            } from '../modules/nf-core/modules/prokka/main'
+include { GAMMA as GAMMA_REPL               } from '../modules/nf-core/modules/gamma/main'
+include { MASHTREE                          } from '../modules/nf-core/modules/mashtree/main'
+include { MULTIQC                           } from '../modules/nf-core/modules/multiqc/main'
+include { CUSTOM_DUMPSOFTWAREVERSIONS       } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'
 
 /*
 ========================================================================================
-    IMPORT NF-CORE SUBWORKFLOWS
-========================================================================================
-*/
-
-/*========================================================================================
-   Quaisar Help Function
-========================================================================================
-*/
-
-params.help = false //set to false as default
-// Display help message
-if (params.help){
-	quaisHelp()
-	exit 0
-}
-/*
-========================================================================================
-                                RUN MAIN WORKFLOW
+    RUN MAIN WORKFLOW
 ========================================================================================
 */
 
@@ -178,73 +93,170 @@ def multiqc_report = []
 
 workflow QUAISAR {
 
-    SEQKIT_PAIR ( raw_reads )
+    ch_versions = Channel.empty()
 
-    BBMAP_BBDUK ( SEQKIT_PAIR.out.reads, ch_phiX)
+    // SUBWORKFLOW: Read in samplesheet, validate and stage input files
+    //
+    INPUT_CHECK (
+        ch_input
+    )
+    ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
 
-    FASTP ( BBMAP_BBDUK.out.reads, true, true )
+    BBMAP_BBDUK (
+        INPUT_CHECK.out.reads, params.bbdukdb
+    )
+    ch_versions = ch_versions.mix(BBMAP_BBDUK.out.versions)
 
-    FASTQC ( FASTP.out.reads )
+    FASTP (
+        BBMAP_BBDUK.out.reads, true, true
+    )
+    ch_versions = ch_versions.mix(FASTP.out.versions)
 
-    KRAKEN2_RAW ( FASTP.out.reads, KRAKEN2_DB.out.db) //raw reads
+    FASTQCTRIMD (
+        FASTP.out.reads
+    )
 
-    SRST2 ( FASTP.out..) //MLST being developed by Jill
+    ch_versions = ch_versions.mix(FASTQCTRIMD.out.versions.first())
 
-    SRST2 ( ) //AR being developed by Jill
+    KRAKEN2_TRIMD (
+        FASTP.out.reads, params.path2db, true, true
+    )
 
-    GUNZIP (  ) //confusing may use script I wrote
+    ch_versions = ch_versions.mix(KRAKEN2_TRIMD.out.versions)
 
-    //download a taxonomy database
-    KRONA_KRONADB ( )
-    
-    KRONA ( )
+    //below meta map update brings in <DataflowBroadcast around DataflowStream[?],>
+    //in between file name and db name
+    ar_ch  =  FASTP.out.reads.map{
+                meta, meta1 ->
+                def fmeta = [:]
+                set meta.id
+                fmeta.id = meta.id
+                set meta.single_end
+                fmeta.single_end = meta.single_end
+                set meta.db
+                fmeta.db = "gene"
+                [fmeta, meta1, FASTP.out.reads, params.path2db] //params.ardb]
+            }
+            //.view()
+    //cardinality error occurs using mapping above
+    /*SRST2_TRIMD_AR (
+        ar_ch
+    )
+    ch_versions = ch_versions.mix(SRST2_TRIMD_AR.out.versions)*/
 
-    SPADES ( FASTP.out.reads, directry/file for aa HMMS for guided mode?)
+    //need to know what db is used
+    mlst_ch  =  FASTP.out.reads.map{
+                meta, meta1 ->
+                def fmeta = [:]
+                set meta.id
+                fmeta.id = meta.id
+                set meta.single_end
+                fmeta.single_end = meta.single_end
+                set meta.db
+                fmeta.db = "mlst"
+                [fmeta, meta1, FASTP.out.reads, params.path2db] // params.ardb]
+            }
 
-    /*Questions re: quast 1. Whether to use the provided gff reference annotation file
-    2. What genome GFF file to use. Has to contain at least a non-empty string dummy value.
-    3. Should we use the provided fasta reference genome file?
-    */
-    QUAST( SPADES.out.scaffolds, SPADES.out.contigs, true, SPADES.out.gfa, true )
+    /*SRST2_TRIMD_MLST (
+        mlst_ch
+    )
+    ch_versions = ch_versions.mix(SRST2_TRIMD_MLST.out.versions)*/
 
-    FASTANI ( SPADES.out.scaffolds, SPADES.out.contigs , reference file for query) //does mash occur before this?
+    //spades runs but the modules that require its input do
+    //not recognize the spades output
+    SPADES_LOCAL (
+        FASTP.out.reads
+    )
+    ch_versions = ch_versions.mix(SPADES_LOCAL.out.versions)
 
-    MASHTREE ( SPADES.out.scaffolds )
+    //ch_versions = ch_versions.mix(BUSCO_DB_PREPARATION.out.versions)
+    //prokka_map = prokka_map.map{SPADES_LOCAL.out.scaffolds, }
+    //if (!params.proteins)
+    PROKKA (
+        SPADES_LOCAL.out.scaffolds, [], []
+    )
+    ch_versions = ch_versions.mix(PROKKA.out.versions)
 
-    MLST ( SPADES.out.scaffolds )
-
-    GAMMA ( SPADES.out.scaffolds,  )
-    
-    KRAKEN2_DB ( )
-    
-    KRAKEN2_ASSEMBLED ( SPADES.out.scaffolds, KRAKEN2_DB.out.db ) 
-
-    PROKKA ( SPADES.out.scaffolds ,)
-    
-    if (!params.skip_busco){
+    /*if (!params.skip_busco){
             /*
             * BUSCO subworkflow: Quantitative measures for the assessment of genome assembly
             */
-            ch_input_bins_busco = BINNING.out.bins.mix( BINNING.out.unbinned ).transpose()
-            BUSCO_QC (
+            /*BUSCO_QC (
                 ch_busco_db_file,
                 ch_busco_download_folder,
-                ch_input_bins_busco
+                PROKKA.out.faa
+                //METABAT2_BINNING.out.bins.transpose()
             )
-            ch_busco_summary = BUSCO_QC.out.summary
-            ch_busco_multiqc = BUSCO_QC.out.multiqc
-            ch_versions = ch_versions.mix(BUSCO_QC.out.versions.first())
+            //ch_busco_summary = BUSCO_QC.out.summary
+            //ch_busco_multiqc = BUSCO_QC.out.multiqc
+            //ch_software_versions = ch_software_versions.mix(BUSCO_QC.out.version.first().ifEmpty(null))
             // process information if BUSCO analysis failed for individual bins due to no matching genes
             BUSCO_QC.out
                 .failed_bin
                 .splitCsv(sep: '\t')
                 .map { bin, error -> if (!bin.contains(".unbinned.")) busco_failed_bins[bin] = error }
-        } 
-    
+        }*/
+    //ch_versions = ch_versions.mix(BUSCO_QC.out.versions)
+
+    QUAST (
+        SPADES_LOCAL.out.scaffolds, SPADES_LOCAL.out.contigs, false, PROKKA.out.gff, false
+    )
+    ch_versions = ch_versions.mix(QUAST.out.versions)
+
+    KRAKEN2_ASMBLD (
+        SPADES_LOCAL.out.scaffolds, params.path2db, true, true
+    )
+    ch_versions = ch_versions.mix(KRAKEN2_ASMBLD.out.versions)
+
+    MASHTREE (
+        SPADES_LOCAL.out.scaffolds
+    )
+    ch_versions = ch_versions.mix(KRAKEN2_ASMBLD.out.versions)
+
+    FASTANI (
+        SPADES_LOCAL.out.scaffolds, params.ani_db
+    )
+    ch_versions = ch_versions.mix(FASTANI.out.versions)
+
+    MLST (
+        SPADES_LOCAL.out.scaffolds
+    )
+    ch_versions = ch_versions.mix(MLST.out.versions)
+
+    /*GAMMA_AR (
+        SPADES_LOCAL.out.scaffolds, params.path2db //will this run like kraken2 where it will pull all dbs?
+    )*/
+
+
+    GAMMA_REPL (
+        SPADES_LOCAL.out.scaffolds, params.path2db // params.gamdbpf
+    )
+    ch_versions = ch_versions.mix(GAMMA_REPL.out.versions)
+
+
+    CUSTOM_DUMPSOFTWAREVERSIONS (
+        ch_versions.unique().collectFile(name: 'collated_versions.yml')
+    )
+
+    //
+    // MODULE: MultiQC
+    //
+    workflow_summary    = WorkflowQuaisar.paramsSummaryMultiqc(workflow, summary_params)
+    ch_workflow_summary = Channel.value(workflow_summary)
+
+    ch_multiqc_files = Channel.empty()
+    ch_multiqc_files = ch_multiqc_files.mix(Channel.from(ch_multiqc_config))
+    ch_multiqc_files = ch_multiqc_files.mix(ch_multiqc_custom_config.collect().ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
+    ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
+    ch_multiqc_files = ch_multiqc_files.mix(FASTQCTRIMD.out.zip.collect{it[1]}.ifEmpty([]))
+
+    MULTIQC (
+        ch_multiqc_files.collect()
+    )
+    multiqc_report = MULTIQC.out.report.toList()
+    ch_versions    = ch_versions.mix(MULTIQC.out.versions)
 }
-
-
-
 
 /*
 ========================================================================================
