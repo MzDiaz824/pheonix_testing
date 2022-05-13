@@ -63,7 +63,6 @@ include { MLST                              } from '../modules/nf-core/modules/m
 include { GAMMA as GAMMA_AR                 } from '../modules/nf-core/modules/gamma/main'
 include { PROKKA                            } from '../modules/nf-core/modules/prokka/main'
 include { GAMMA as GAMMA_REPL               } from '../modules/nf-core/modules/gamma/main'
-include { MASHTREE                          } from '../modules/nf-core/modules/mashtree/main'
 include { MULTIQC                           } from '../modules/nf-core/modules/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS       } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'/*
 ========================================================================================
@@ -76,8 +75,8 @@ def multiqc_report = []
 
 workflow QUAISAR {
 
-    ch_versions = Channel.empty()
-
+    ch_versions     =   Channel.empty()
+    ch_tree_input   =   Channel.empty()
     //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
     //
@@ -96,11 +95,9 @@ workflow QUAISAR {
     )
     ch_versions = ch_versions.mix(FASTP.out.versions)
 
-    //ok
     FASTQCTRIMD (
         FASTP.out.reads
     )
-
     ch_versions = ch_versions.mix(FASTQCTRIMD.out.versions.first())
 
     //pending module improvements
@@ -109,7 +106,7 @@ workflow QUAISAR {
         //mlst_ch
     )*/
 
-    //ok
+
     KRAKEN2_TRIMD (
         FASTP.out.reads, params.path2db, true, true
     )
@@ -154,11 +151,6 @@ workflow QUAISAR {
     )
     ch_versions = ch_versions.mix(BUSCO.out.versions)
 
-    //mashtree error: can't perform on a single file
-    //MASHTREE (
-        //SPADES_LOCAL.out.scaffolds.map{ meta, reads -> [ [id:meta.id, single_end:meta.single_end]]}
-    //)
-    //ch_versions = ch_versions.mix(MASHTREE.out.versions)
 
     //error kraken2: --paired requires positive and even number filename
     //KRAKEN2_ASMBLD (
