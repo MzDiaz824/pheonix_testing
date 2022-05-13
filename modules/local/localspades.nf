@@ -6,8 +6,9 @@ process SPADES_LOCAL {
     tuple val(meta), path(reads)
 
     output:
-    tuple val(meta), path('*.scaffolds.fa.gz'), optional:true, emit: scaffolds
+    tuple val(meta), path('*.scaffolds.fa.gz')    , optional:true, emit: scaffolds
     tuple val(meta), path('*.contigs.fa.gz')      , optional:true, emit: contigs
+    path('*.contigs.fa.gz')                       , optional:true, emit: contigs_quast
     tuple val(meta), path('*.transcripts.fa.gz')  , optional:true, emit: transcripts
     tuple val(meta), path('*.gene_clusters.fa.gz'), optional:true, emit: gene_clusters
     tuple val(meta), path('*.assembly.gfa.gz')    , optional:true, emit: gfa
