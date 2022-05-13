@@ -35,10 +35,11 @@ ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multi
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-include { INPUT_CHECK } from '../subworkflows/local/input_check'
+include { INPUT_CHECK  } from '../subworkflows/local/input_check'
 include { SPADES_LOCAL } from '../modules/local/localspades'
 include { BUSCO        } from '../modules/local/busco'
 include { GAMMA_PREP   } from '../modules/local/gammaprep'
+include { QUAST        } from '../modules/local/localquast'
 
 /*
 ========================================================================================
@@ -57,7 +58,6 @@ include { SRST2_SRST2 as SRST2_TRIMD_MLST   } from '../modules/nf-core/modules/s
 include { KRAKEN2_KRAKEN2 as KRAKEN2_TRIMD  } from '../modules/nf-core/modules/kraken2/kraken2/main'
 include { KRAKEN2_KRAKEN2 as KRAKEN2_ASMBLD } from '../modules/nf-core/modules/kraken2/kraken2/main'
 include { SPADES                            } from '../modules/nf-core/modules/spades/main'
-include { QUAST                             } from '../modules/nf-core/modules/quast/main'
 include { FASTANI                           } from '../modules/nf-core/modules/fastani/main'
 include { MLST                              } from '../modules/nf-core/modules/mlst/main'
 include { GAMMA as GAMMA_AR                 } from '../modules/nf-core/modules/gamma/main'
@@ -96,6 +96,7 @@ workflow QUAISAR {
     )
     ch_versions = ch_versions.mix(FASTP.out.versions)
 
+    //ok
     FASTQCTRIMD (
         FASTP.out.reads
     )
@@ -108,22 +109,16 @@ workflow QUAISAR {
         //mlst_ch
     )*/
 
+    //ok
     KRAKEN2_TRIMD (
         FASTP.out.reads, params.path2db, true, true
     )
-
     ch_versions = ch_versions.mix(KRAKEN2_TRIMD.out.versions)
 
     SPADES_LOCAL (
         FASTP.out.reads
     )
     ch_versions = ch_versions.mix(SPADES_LOCAL.out.versions)
-
-    //mashtree error: can't perform on a single file
-    //MASHTREE (
-        //FASTP.out.reads.map{ meta, reads -> [ [id:meta.id, single_end:meta.single_end], params.scaffolds]}
-    //)
-    //ch_versions = ch_versions.mix(MASHTREE.out.versions)
 
     FASTANI (
         SPADES_LOCAL.out.scaffolds, params.ardb
@@ -149,26 +144,27 @@ workflow QUAISAR {
     )
     ch_versions = ch_versions.mix(PROKKA.out.versions)
 
-    ch_quast = Channel.fromPath( "params.outdir/gamma/*.fa" )
-    ch_quast.view()
-    //QUAST (
-        //ch_quast, [], false, PROKKA.out.gff, true
-        //GAMMA_PREP.out.prepped, SPADES_LOCAL.out.contigs, false, PROKKA.out.gff, true
-    //)
-    //ch_versions = ch_versions.mix(QUAST.out.versions)
-
-
-    ch_versions = ch_versions.mix(KRAKEN2_ASMBLD.out.versions)
+    QUAST (
+        SPADES_LOCAL.out.contigs
+    )
+    ch_versions = ch_versions.mix(QUAST.out.versions)
 
     BUSCO (
         SPADES_LOCAL.out.scaffolds, 'auto', [], []
     )
     ch_versions = ch_versions.mix(BUSCO.out.versions)
 
+    //mashtree error: can't perform on a single file
+    //MASHTREE (
+        //SPADES_LOCAL.out.scaffolds.map{ meta, reads -> [ [id:meta.id, single_end:meta.single_end]]}
+    //)
+    //ch_versions = ch_versions.mix(MASHTREE.out.versions)
+
     //error kraken2: --paired requires positive and even number filename
-    KRAKEN2_ASMBLD (
-        SPADES_LOCAL.out.scaffolds, params.path2db, true, true
-    )
+    //KRAKEN2_ASMBLD (
+        //GAMMA_PREP.out.prepped, params.path2db, true, true
+    //)
+    //ch_versions = ch_versions.mix(KRAKEN2_ASMBLD.out.versions)
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
