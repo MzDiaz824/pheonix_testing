@@ -6,6 +6,7 @@ process GAMMA_PREP {
 
     output:
     tuple val(meta), path('*.scaffolds.fa'), optional:true, emit: prepped
+    path('*.scaffolds.fa.gz'), optional:true, emit: scaffolds_quast
 
     script:
     """
