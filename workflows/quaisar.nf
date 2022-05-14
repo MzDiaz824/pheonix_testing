@@ -35,12 +35,13 @@ ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multi
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-include { INPUT_CHECK  } from '../subworkflows/local/input_check'
-include { SPADES_LOCAL } from '../modules/local/localspades'
-include { BUSCO        } from '../modules/local/busco'
-include { GAMMA_PREP   } from '../modules/local/gammaprep'
-include { QUAST        } from '../modules/local/localquast'
-
+include { INPUT_CHECK         } from '../subworkflows/local/input_check'
+include { SPADES_LOCAL        } from '../modules/local/localspades'
+include { BUSCO               } from '../modules/local/busco'
+include { GAMMA_S             } from '../modules/local/gammas'
+include { BBMAP_REFORMAT      } from '../modules/local/bbmapreformat'
+include { CONTIG_PREP         } from '../modules/local/contigprep'
+include { GAMMA_PREP          } from '../modules/local/gammaprep'
 /*
 ========================================================================================
     IMPORT NF-CORE MODULES/SUBWORKFLOWS
@@ -62,7 +63,8 @@ include { FASTANI                           } from '../modules/nf-core/modules/f
 include { MLST                              } from '../modules/nf-core/modules/mlst/main'
 include { GAMMA as GAMMA_AR                 } from '../modules/nf-core/modules/gamma/main'
 include { PROKKA                            } from '../modules/nf-core/modules/prokka/main'
-include { GAMMA as GAMMA_REPL               } from '../modules/nf-core/modules/gamma/main'
+include { QUAST                             } from '../modules/nf-core/modules/quast/main'
+include { GAMMA as GAMMA_HV                 } from '../modules/nf-core/modules/gamma/main'
 include { MULTIQC                           } from '../modules/nf-core/modules/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS       } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'/*
 ========================================================================================
@@ -100,11 +102,10 @@ workflow QUAISAR {
     )
     ch_versions = ch_versions.mix(FASTQCTRIMD.out.versions.first())
 
-    //pending module improvements
-    /*SRST2_TRIMD_AR (
-        FASTP.out.reads.map{ meta, reads -> [ [id:meta.id, single_end:meta.single_end, db:'gene'], reads, params.ardb]}
-        //mlst_ch
-    )*/
+    SRST2_TRIMD_AR (
+        FASTP.out.reads.map{ meta, reads -> [ [id:meta.id, single_end:meta.single_end, db:'gene'], reads, params.srstar]}
+    )
+    ch_versions = ch_versions.mix(SRST2_TRIMD_AR.out.versions)
 
 
     KRAKEN2_TRIMD (
@@ -117,50 +118,69 @@ workflow QUAISAR {
     )
     ch_versions = ch_versions.mix(SPADES_LOCAL.out.versions)
 
-    FASTANI (
-        SPADES_LOCAL.out.scaffolds, params.ardb
+    BBMAP_REFORMAT (
+        SPADES_LOCAL.out.scaffolds
     )
-    ch_versions = ch_versions.mix(FASTANI.out.versions)
+    ch_versions = ch_versions.mix(BBMAP_REFORMAT.out.versions)
+
+    GAMMA_PREP (
+        BBMAP_REFORMAT.out.reads
+    )
+
+    //FASTANI (
+        //BBMAP_REFORMAT.out.reads, params.ardb
+    //)
+    //ch_versions = ch_versions.mix(FASTANI.out.versions)
 
     MLST (
-        SPADES_LOCAL.out.scaffolds
+        BBMAP_REFORMAT.out.reads
     )
     ch_versions = ch_versions.mix(MLST.out.versions)
 
-    GAMMA_PREP (
-        SPADES_LOCAL.out.scaffolds
+    GAMMA_HV (
+        GAMMA_PREP.out.prepped, params.hvgamdb
     )
+    ch_versions = ch_versions.mix(GAMMA_HV.out.versions)
 
-    GAMMA_REPL (
+    GAMMA_AR (
+        GAMMA_PREP.out.prepped, params.ardb
+    )
+    ch_versions = ch_versions.mix(GAMMA_AR.out.versions)
+
+    GAMMA_S (
         GAMMA_PREP.out.prepped, params.gamdbpf
     )
-    ch_versions = ch_versions.mix(GAMMA_REPL.out.versions)
+    ch_versions = ch_versions.mix(GAMMA_S.out.versions)
 
     PROKKA (
         GAMMA_PREP.out.prepped, [], []
     )
     ch_versions = ch_versions.mix(PROKKA.out.versions)
 
-    QUAST (
+    CONTIG_PREP (
         SPADES_LOCAL.out.contigs
+    )
+
+    QUAST (
+        CONTIG_PREP.out.contigs, [], [], false, false
     )
     ch_versions = ch_versions.mix(QUAST.out.versions)
 
     BUSCO (
-        SPADES_LOCAL.out.scaffolds, 'auto', [], []
+        BBMAP_REFORMAT.out.reads, 'auto', [], []
     )
     ch_versions = ch_versions.mix(BUSCO.out.versions)
 
 
-    //error kraken2: --paired requires positive and even number filename
-    //KRAKEN2_ASMBLD (
-        //GAMMA_PREP.out.prepped, params.path2db, true, true
-    //)
+    //error kraken2: --paired requires positive and even number filename updated bbformat to change the numbers of the files
+    KRAKEN2_ASMBLD (
+        BBMAP_REFORMAT.out.reads, params.path2db, true, true
+    )
     //ch_versions = ch_versions.mix(KRAKEN2_ASMBLD.out.versions)
 
-    CUSTOM_DUMPSOFTWAREVERSIONS (
-        ch_versions.unique().collectFile(name: 'collated_versions.yml')
-    )
+    //CUSTOM_DUMPSOFTWAREVERSIONS (
+        //ch_versions.unique().collectFile(name: 'collated_versions.yml')
+    //)
 
     //
     // MODULE: MultiQC
@@ -172,7 +192,7 @@ workflow QUAISAR {
     ch_multiqc_files = ch_multiqc_files.mix(Channel.from(ch_multiqc_config))
     ch_multiqc_files = ch_multiqc_files.mix(ch_multiqc_custom_config.collect().ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
-    ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
+    //ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
     ch_multiqc_files = ch_multiqc_files.mix(FASTQCTRIMD.out.zip.collect{it[1]}.ifEmpty([]))
 
     MULTIQC (
