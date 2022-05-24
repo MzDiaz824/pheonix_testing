@@ -22,10 +22,9 @@
     ```
 1. **SRA Reads**
     ```console
-    nextflow run main.nf -profile singularity,test_pass ----sra_file ./assets/sra_list.txt
+    nextflow run main.nf -profile singularity,test_pass --sra_file <./assets/sra_list.txt>
     ```
 - Please use the sra_list.txt file provided as it contains the Beta testing SRA reads. This can be overwritten using SRA read IDs of interest in the future.
-- Users may pass any path to a list of SRA files with the following command:
 
 2. **FastQ files from a path**
     ```console
@@ -103,6 +102,11 @@ The nf-core/quaisar pipeline is designed to allow analysis of various file types
     nextflow run nf-core/quaisar -profile <docker/singularity/podman/shifter/charliecloud/conda/institute> -entry <rawqc>
 
 4.  We may want to allow repeating individual steps when part of the process fails (as it has in the past)
+
+## Troubleshooting 
+Users may encounter exended lag time and/or issues connecting to certain databases. This can commonly occur while running the 
+pipeline on a cluster. Please confirm that your HPC environment is not experiencing technical issues, updates, and/or downtimes 
+that impact functionality if these types of errors occur.
 ## Documentation
 
 
