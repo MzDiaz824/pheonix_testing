@@ -1,7 +1,43 @@
-### Pipeline summary:
+
+## <div align="center"> Getting Started</div>
+
+1. Install [`Nextflow`](https://www.nextflow.io/docs/latest/getstarted.html#installation) (`>=21.10.3`)
+
+2. Install any of [`Docker`](https://docs.docker.com/engine/installation/) or [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/)
+
+4. Start running your own analysis!
+
+    <!-- TODO nf-core: Update the example "typical command" below used to run the pipeline -->
+
+    ```console
+
+    nextflow run nf-core/quaisar -profile <docker/singularity> --input samplesheet.csv --genome GRCh37
+
+    ```
+## <div align="center">Running QuAISAR:</div>
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+**Note:** First-time users will need to run the following command and allow the required databases to download:
+    ```console
+    nextflow run nf-core/quaisar -profile singularity -entry <databasedownloads>
+    ```
+1. **SRA Reads**
+    ```console
+    nextflow run main.nf -profile singularity,test_pass ----sra_file ./assets/sra_list.txt
+    ```
+- Please use the sra_list.txt file provided as it contains the Beta testing SRA reads. This can be overwritten using SRA read IDs of interest in the future.
+- Users may pass any path to a list of SRA files with the following command:
+
+2. **FastQ files from a path**
+    ```console
+    nextflow run main.nf -profile singularity,test_pass --sra_input ./assets/samplesheet.csv
+    ```
+- Please use the samplesheet.csv provided in the pipeline. ***Do not use spaces after the commas.***
+- The format should be: ***<sample,path_to_fastq_1,path_to_fastq_2>***
+## <div align="center">Pipeline summary:</div>
 -------------------------------------------------------------------------------------------------------------------------------------------------------
 <!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->
-
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+### Preprocessing of Raw Reads
 1. PhiX adapter trimming and filtering of reads using BBDuK ([`BBDuK`](https://github.com/BioInfoTools/BBMap))
 2. Read filtering, adapter trimming, quality profiling and base correction using fastp ([`fastp`](https://github.com/OpenGene/fastp))
 3. Raw Reads QC Assessment specifics found in "QC Summary by Read Processing State" section
@@ -15,22 +51,22 @@
 
 ### Analysis of Trimmed Reads
 --------------------------------------------------------------------------------------------------------------------------------------------------------
-4T. Gene detection and allele calling for antibiotic resistance, virulence (adding hypervirulence genes beyond their mention in the alerts section?), and/or plasmids using srst2 AR ([`srst2 AR`](https://github.com/katholt/srst2) <br>
+4T. Gene detection and allele calling for antibiotic resistance, virulence (adding hypervirulence genes beyond their mention in the alerts section?), and/or plasmids using srst2 AR ([`srst2 AR`](https://github.com/katholt/srst2)) <br>
 5T. Report sequence types based on MLST alleles and profile definitions using srst2 MLST ([`srst2 MLST`](https://github.com/katholt/srst2)) <br>
-6T. Kraken2 ()<br>
+6T. Kraken2 ([`Kraken2`](https://github.com/nf-core/modules/tree/master/modules/kraken2/kraken2))<br>
 
 ### Assembly
 --------------------------------------------------------------------------------------------------------------------------------------------------------
-5. Assemby of trimed reads using SPAdes ([`SPAdes`](https://github.com/ablab/spades))<br>
-### Analysis of Assembled Reads <= 500bps
+5. Assemby of trimmed reads using SPAdes ([`SPAdes`](https://github.com/ablab/spades))<br>
+### Analysis of Assembled Reads >= 500bps
 --------------------------------------------------------------------------------------------------------------------------------------------------------
 4A. Assess assembly quality using QUAST ([`QUAST`](https://github.com/ablab/quast)) <br>
 5A. Measure the nucleotide-level coding region similarity (between genomes) using fastANI ([`fastANI`](https://github.com/ParBLiSS/FastANI))<br>
-6A. Type multiple loci to characterized isolates of microbial species using MLST ([`MLST`](https://github.com/tseemann/mlst))<br>
+6A. Type multiple loci to characterize isolates of microbial species using MLST ([`MLST`](https://github.com/tseemann/mlst))<br>
 7A. Detect hypervirulence genes and find best matches to untranslated genes from a gene database using GAMMA ([`GAMMA`](https://github.com/rastanton/GAMMA))<br>
 9A. Rapid whole genome annotation using Prokka ([`PROKKA`](https://github.com/tseemann/prokka))<br>
 10A. Assess genome assembly for completeness using BUSCO ([`BUSCO`](https://busco.ezlab.org/))<br>
-11A. KRAKEN2 ()<br>
+11A. KRAKEN2 ([`Kraken2`](https://github.com/nf-core/modules/tree/master/modules/kraken2/kraken2))<br>
 
 
 
@@ -41,46 +77,11 @@
 
 <!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->
 #### Raw Reads
-1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))<br>
-2. Present QC for raw reads ([`MultiQC`](http://multiqc.info/))
-
-#### Trimmed Reads
-
-
-
+1. Trimmed & assembled read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))<br>
+2. Software versions list ([`MultiQC`](http://multiqc.info/))
 
 ![Workflow](docs/images/coreWF.PNG)
 
-### Quick Start
-
-1. Install [`Nextflow`](https://www.nextflow.io/docs/latest/getstarted.html#installation) (`>=21.10.3`)
-
-2. Install any of [`Docker`](https://docs.docker.com/engine/installation/), [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/), [`Podman`](https://podman.io/), [`Shifter`](https://nersc.gitlab.io/development/shifter/how-to-use/) or [`Charliecloud`](https://hpc.github.io/charliecloud/) for full pipeline reproducibility _(please only use [`Conda`](https://conda.io/miniconda.html) as a last resort; see [docs](https://nf-co.re/usage/configuration#basic-configuration-profiles))_
-
-3. Download the pipeline and test it on a minimal dataset with a single command:
-
-    ```console
-
-    nextflow run nf-core/quaisar -profile test,YOURPROFILE
-
-    ```
-
-    Note that some form of configuration will be needed so that Nextflow knows how to fetch the required software. This is usually done in the form of a config profile (`YOURPROFILE` in the example command above). You can chain multiple config profiles in a comma-separated string.
-
-    > * The pipeline comes with config profiles called `docker`, `singularity`, `podman`, `shifter`, `charliecloud` and `conda` which instruct the pipeline to use the named tool for software management. For example, `-profile test,docker`.
-    > * Please check [nf-core/configs](https://github.com/nf-core/configs#documentation) to see if a custom config file to run nf-core pipelines already exists for your Institute. If so, you can simply use `-profile <institute>` in your command. This will enable either `docker` or `singularity` and set the appropriate execution settings for your local compute environment.
-    > * If you are using `singularity` and are persistently observing issues downloading Singularity images directly due to timeout or network issues, then you can use the `--singularity_pull_docker_container` parameter to pull and convert the Docker image instead. Alternatively, you can use the [`nf-core download`](https://nf-co.re/tools/#downloading-pipelines-for-offline-use) command to download images first, before running the pipeline. Setting the [`NXF_SINGULARITY_CACHEDIR` or `singularity.cacheDir`](https://www.nextflow.io/docs/latest/singularity.html?#singularity-docker-hub) Nextflow options enables you to store and re-use the images from a central location for future pipeline runs.
-    > * If you are using `conda`, it is highly recommended to use the [`NXF_CONDA_CACHEDIR` or `conda.cacheDir`](https://www.nextflow.io/docs/latest/conda.html) settings to store the environments in a central location for future pipeline runs.
-
-4. Start running your own analysis!
-
-    <!-- TODO nf-core: Update the example "typical command" below used to run the pipeline -->
-
-    ```console
-
-    nextflow run nf-core/quaisar -profile <docker/singularity/podman/shifter/charliecloud/conda/institute> --input samplesheet.csv --genome GRCh37
-
-    ```
 
 ## Utilizing QuAISAR from multiple entry points
 
