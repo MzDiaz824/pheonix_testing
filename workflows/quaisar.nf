@@ -44,12 +44,9 @@ include { BUSCO                  } from '../modules/local/busco'
 include { GAMMA_S                } from '../modules/local/gammas'
 include { FASTP as FASTP_SINGLES } from '../modules/local/localfastp'
 include { BBMAP_REFORMAT         } from '../modules/local/bbmapreformat'
-include { CONTIG_PREP            } from '../modules/local/contigprep'
 include { GAMMA_PREP             } from '../modules/local/gammaprep'
 include { SRA_FASTQ_SRATOOLS     } from '../subworkflows/local/sra_read_grab'
-//include { SRST2_MLST           } from '../modules/local/localsrst2'
-//include { SRST2_SPECIES        } from '../modules/local/speciesprep'
-//include { QC_REPORTSHEET       } from '../modules/local/qc_reportsheet.nf'
+
 
 /*
 ========================================================================================
@@ -134,13 +131,6 @@ workflow QUAISAR {
     )
     ch_versions = ch_versions.mix(KRAKEN2_TRIMD.out.versions)
 
-    /*SRST2_SPECIES (
-        KRAKEN2_TRIMD.out.report
-    )
-    SRST2_MLST (
-        FASTP_TRIMD.out.reads.map{ meta, reads -> [ [id:meta.id, single_end:meta.single_end, db:'mlst'], reads]}, KRAKEN2_TRIMD.out.report
-    )
-*/
     SPADES_LOCAL (
         FASTP_TRIMD.out.reads
     )
@@ -179,23 +169,20 @@ workflow QUAISAR {
         GAMMA_PREP.out.prepped, params.gamdbpf
     )
     ch_versions = ch_versions.mix(GAMMA_S.out.versions)
-
+/*
     PROKKA (
         GAMMA_PREP.out.prepped, [], []
     )
     ch_versions = ch_versions.mix(PROKKA.out.versions)
 
-    CONTIG_PREP (
-        SPADES_LOCAL.out.contigs
-    )
-
-    QUAST (
-        CONTIG_PREP.out.contigs, [], [], false, false
-    )
-    ch_versions = ch_versions.mix(QUAST.out.versions)
+   */
+   //QUAST (
+        //BBMAP_REFORMAT.out.reads, [], [], false, false
+    //)
+    //ch_versions = ch_versions.mix(QUAST.out.versions)
 
     BUSCO (
-        BBMAP_REFORMAT.out.reads, 'auto', [], []
+        SPADES_LOCAL.out.scaffolds, 'auto', [], []
     )
     ch_versions = ch_versions.mix(BUSCO.out.versions)
 
