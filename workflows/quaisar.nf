@@ -45,7 +45,7 @@ include { GAMMA_S                } from '../modules/local/gammas'
 include { FASTP as FASTP_SINGLES } from '../modules/local/localfastp'
 include { BBMAP_REFORMAT         } from '../modules/local/contig_less500'
 include { GAMMA_PREP             } from '../modules/local/gammaprep'
-include { SRA_FASTQ_SRATOOLS     } from '../subworkflows/local/sra_read_grab'
+include { QUAST                  } from '../modules/local/localquast'
 
 
 /*
@@ -69,7 +69,6 @@ include { FASTANI                           } from '../modules/nf-core/modules/f
 include { MLST                              } from '../modules/nf-core/modules/mlst/main'
 include { GAMMA as GAMMA_AR                 } from '../modules/nf-core/modules/gamma/main'
 include { PROKKA                            } from '../modules/nf-core/modules/prokka/main'
-include { QUAST                             } from '../modules/nf-core/modules/quast/main'
 include { GAMMA as GAMMA_HV                 } from '../modules/nf-core/modules/gamma/main'
 include { MULTIQC                           } from '../modules/nf-core/modules/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS       } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'
@@ -85,7 +84,7 @@ def multiqc_report = []
 
 workflow QUAISAR {
 
-    ch_versions     =   Channel.empty()
+    ch_versions     = Channel.empty()
     ch_sra_list     = Channel.empty()
     spades_ch       = Channel.empty()
 
@@ -173,7 +172,7 @@ workflow QUAISAR {
     ch_versions = ch_versions.mix(GAMMA_S.out.versions)
 
    QUAST (
-        BBMAP_REFORMAT.out.reads, [], [], false, false
+        BBMAP_REFORMAT.out.reads
     )
     ch_versions = ch_versions.mix(QUAST.out.versions)
 
