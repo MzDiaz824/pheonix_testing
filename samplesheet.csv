@@ -1,0 +1,4 @@
+sample,fastq_1,fastq_2
+2021GO-0183, /scicomp/groups/OID/NCEZID/DHQP/CEMB/MiSeqAnalysisFiles/external/2021GO-0183/FASTQs/2021GO-0183_R1_001.fastq.gz, /scicomp/groups/OID/NCEZID/DHQP/CEMB/MiSeqAnalysisFiles/external/2021GO-0183/FASTQs/2021GO-0183_R2_001.fastq.gz
+2021KU-00031, /scicomp/groups/OID/NCEZID/DHQP/CEMB/MiSeqAnalysisFiles/external/2021KU-00031/FASTQs/2021KU-00031_R1_001.fastq.gz, /scicomp/groups/OID/NCEZID/DHQP/CEMB/MiSeqAnalysisFiles/external/2021KU-00031/FASTQs/2021KU-00031_R2_001.fastq.gz
+DHQP1701672, /scicomp/groups/OID/NCEZID/DHQP/CEMB/MiSeqAnalysisFiles/180504_M02103_0019_000000000-BDFCP/1701672/FASTQs/1701672_R1_001.fastq.gz, /scicomp/groups/OID/NCEZID/DHQP/CEMB/MiSeqAnalysisFiles/180504_M02103_0019_000000000-BDFCP/1701672/FASTQs/1701672_R2_001.fastq.gz

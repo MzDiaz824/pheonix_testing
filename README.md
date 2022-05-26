@@ -1,9 +1,10 @@
-
 ## <div align="center"> Getting Started</div>
 
 1. Install [`Nextflow`](https://www.nextflow.io/docs/latest/getstarted.html#installation) (`>=21.10.3`)
 
-2. Install any of [`Docker`](https://docs.docker.com/engine/installation/) or [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/)
+
+2. Install [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/)
+
 
 4. Start running your own analysis!
 
@@ -11,27 +12,20 @@
 
     ```console
 
-    nextflow run nf-core/quaisar -profile <docker/singularity> --input samplesheet.csv --genome GRCh37
+
+    nextflow run main.nf -profile singularity  --input <path_to_samplesheet.csv> --outdir <path_to_results_directory>
 
     ```
-## <div align="center">Running QuAISAR:</div>
+
+**Please specify a directory for your results if you'd like to keep data for long term storage. Omitting the <--outdir> command will require the user to copy the pipeline results directory to the desired directory. This can consume a large amount of time when more than 5 samples are run.**
+## <div align="center">Running Quaisar:</div>
+
 -------------------------------------------------------------------------------------------------------------------------------------------------------
 **Note:** First-time users will need to run the following command and allow the required databases to download:
     ```console
     nextflow run nf-core/quaisar -profile singularity -entry <databasedownloads>
     ```
-1. **SRA Reads**
-    ```console
-    nextflow run main.nf -profile singularity,test_pass --sra_file <./assets/sra_list.txt>
-    ```
-- Please use the sra_list.txt file provided as it contains the Beta testing SRA reads. This can be overwritten using SRA read IDs of interest in the future.
 
-2. **FastQ files from a path**
-    ```console
-    nextflow run main.nf -profile singularity,test_pass --sra_input ./assets/samplesheet.csv
-    ```
-- Please use the samplesheet.csv provided in the pipeline. ***Do not use spaces after the commas.***
-- The format should be: ***<sample,path_to_fastq_1,path_to_fastq_2>***
 ## <div align="center">Pipeline summary:</div>
 -------------------------------------------------------------------------------------------------------------------------------------------------------
 <!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->
@@ -80,33 +74,15 @@
 2. Software versions list ([`MultiQC`](http://multiqc.info/))
 
 ![Workflow](docs/images/coreWF.PNG)
-
-
-## Utilizing QuAISAR from multiple entry points
-
-The nf-core/quaisar pipeline is designed to allow analysis of various file types. The commands below will allow users to change entry points depending on the file type available:
-
-1. Assembled Reads
-
-    ```console
-    nextflow run nf-core/quaisar -profile <docker/singularity/podman/shifter/charliecloud/conda/institute> -entry <spadestoend>
-
-2. Trimmed Reads
-
-    ```console
-    nextflow run nf-core/quaisar -profile <docker/singularity/podman/shifter/charliecloud/conda/institute> -entry <trimmed>
-
-3. Raw Read QC only
-
-    ```console
-    nextflow run nf-core/quaisar -profile <docker/singularity/podman/shifter/charliecloud/conda/institute> -entry <rawqc>
-
-4.  We may want to allow repeating individual steps when part of the process fails (as it has in the past)
-
-## Troubleshooting 
-Users may encounter exended lag time and/or issues connecting to certain databases. This can commonly occur while running the 
-pipeline on a cluster. Please confirm that your HPC environment is not experiencing technical issues, updates, and/or downtimes 
+## Troubleshooting
+Users may encounter exended lag time and/or issues connecting to certain databases. This can commonly occur while running the
+pipeline on a cluster. Please confirm that your HPC environment is not experiencing technical issues, updates, and/or downtimes
 that impact functionality if these types of errors occur.
+
+Specifically, this error indicates that the user will need additional memory in order to run Kraken2.
+
+![Workflow](docs/images/k2_error.PNG)
+
 ## Documentation
 
 
