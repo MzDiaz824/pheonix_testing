@@ -27,6 +27,9 @@
             "kraken2/kraken2": {
                 "git_sha": "abe025677cdd805cc93032341ab19885473c1a07"
             },
+            "mash/sketch": {
+                "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
+            },
             "mashtree": {
                 "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
             },
@@ -36,9 +39,6 @@
             "multiqc": {
                 "git_sha": "20d8250d9f39ddb05dfb437603aaf99b5c0b2b41"
             },
-            "prinseqplusplus": {
-                "git_sha": "f1c5384c31e985591716afdd732cf8c2ae29d05b"
-            },
             "prokka": {
                 "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
             },
@@ -47,12 +47,6 @@
             },
             "spades": {
                 "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
-            },
-            "sratools/fasterqdump": {
-                "git_sha": "0cdf7767a79faf424645beeff83ecfa5528b6a7c"
-            },
-            "sratools/prefetch": {
-                "git_sha": "1b228835e9525990db99243cb4f0d07aa6e01bc3"
             },
             "srst2/srst2": {
                 "git_sha": "24dc2d21132b07b4c3d36c9836885427a5019b11"
