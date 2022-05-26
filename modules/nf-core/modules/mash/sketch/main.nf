@@ -12,6 +12,7 @@ process MASH_SKETCH {
     output:
     tuple val(meta), path("*.msh")        , emit: mash
     tuple val(meta), path("*.mash_stats") , emit: stats
+    path("*.msh")                         , emit: mash_sketch
     path "versions.yml"                   , emit: versions
 
     when:
