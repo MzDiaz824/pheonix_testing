@@ -43,7 +43,7 @@ include { SPADES_LOCAL           } from '../modules/local/localspades'
 include { BUSCO                  } from '../modules/local/busco'
 include { GAMMA_S                } from '../modules/local/gammas'
 include { FASTP as FASTP_SINGLES } from '../modules/local/localfastp'
-include { BBMAP_REFORMAT         } from '../modules/local/bbmapreformat'
+include { BBMAP_REFORMAT         } from '../modules/local/contig_less500'
 include { GAMMA_PREP             } from '../modules/local/gammaprep'
 include { SRA_FASTQ_SRATOOLS     } from '../subworkflows/local/sra_read_grab'
 
@@ -64,7 +64,7 @@ include { SRST2_SRST2 as SRST2_TRIMD_AR     } from '../modules/nf-core/modules/s
 include { KRAKEN2_KRAKEN2 as KRAKEN2_TRIMD  } from '../modules/nf-core/modules/kraken2/kraken2/main'
 include { KRAKEN2_KRAKEN2 as KRAKEN2_ASMBLD } from '../modules/nf-core/modules/kraken2/kraken2/main'
 include { SPADES                            } from '../modules/nf-core/modules/spades/main'
-include { MASHTREE                          } from '../modules/nf-core/modules/mashtree/main'
+include { MASH_SKETCH                       } from '../modules/nf-core/modules/mash/sketch/main'
 include { FASTANI                           } from '../modules/nf-core/modules/fastani/main'
 include { MLST                              } from '../modules/nf-core/modules/mlst/main'
 include { GAMMA as GAMMA_AR                 } from '../modules/nf-core/modules/gamma/main'
@@ -139,7 +139,7 @@ workflow QUAISAR {
     spades_ch = SPADES_LOCAL.out.scaffolds.map{meta, scaffolds -> [ [id:meta.id, single_end:true], scaffolds]}
 
     BBMAP_REFORMAT (
-        SPADES_LOCAL.out.scaffolds
+        spades_ch
     )
     ch_versions = ch_versions.mix(BBMAP_REFORMAT.out.versions)
 
@@ -147,10 +147,10 @@ workflow QUAISAR {
         BBMAP_REFORMAT.out.reads
     )
 
-    MASHTREE (
+    MASH_SKETCH (
         GAMMA_PREP.out.prepped
     )
-    ch_versions = ch_versions.mix(MASHTREE.out.versions)
+    ch_versions = ch_versions.mix(MASH_SKETCH.out.versions)
 
     MLST (
         BBMAP_REFORMAT.out.reads
@@ -171,31 +171,24 @@ workflow QUAISAR {
         GAMMA_PREP.out.prepped, params.gamdbpf
     )
     ch_versions = ch_versions.mix(GAMMA_S.out.versions)
-/*
-    PROKKA (
-        GAMMA_PREP.out.prepped, [], []
-    )
-    ch_versions = ch_versions.mix(PROKKA.out.versions)
 
-   */
-   //QUAST (
-        //BBMAP_REFORMAT.out.reads, [], [], false, false
-    //)
-    //ch_versions = ch_versions.mix(QUAST.out.versions)
+   QUAST (
+        BBMAP_REFORMAT.out.reads, [], [], false, false
+    )
+    ch_versions = ch_versions.mix(QUAST.out.versions)
 
     BUSCO (
         spades_ch, 'auto', [], []
     )
     ch_versions = ch_versions.mix(BUSCO.out.versions)
 
-    //error kraken2: --paired requires positive and even number filename updated bbformat to change the numbers of the files
     KRAKEN2_ASMBLD (
         BBMAP_REFORMAT.out.reads, params.path2db, true, true
     )
     ch_versions = ch_versions.mix(KRAKEN2_ASMBLD.out.versions)
 
     FASTANI (
-        SPADES_LOCAL.out.scaffolds, needs the mash sketch here
+        SPADES_LOCAL.out.scaffolds, MASH_SKETCH.out.mash
     )
     ch_versions = ch_versions.mix(FASTANI.out.versions)
 
