@@ -187,7 +187,7 @@ workflow QUAISAR {
     ch_versions = ch_versions.mix(KRAKEN2_ASMBLD.out.versions)
 
     FASTANI (
-        SPADES_LOCAL.out.scaffolds, MASH_SKETCH.out.mash
+        SPADES_LOCAL.out.scaffolds, MASH_SKETCH.out.mash_sketch
     )
     ch_versions = ch_versions.mix(FASTANI.out.versions)
 
