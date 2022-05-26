@@ -2,7 +2,9 @@
 
 1. Install [`Nextflow`](https://www.nextflow.io/docs/latest/getstarted.html#installation) (`>=21.10.3`)
 
+
 2. Install [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/)
+
 
 4. Start running your own analysis!
 
@@ -10,12 +12,14 @@
 
     ```console
 
+
     nextflow run main.nf -profile singularity  --input <path_to_samplesheet.csv> --outdir <path_to_results_directory>
 
     ```
 
 **Please specify a directory for your results if you'd like to keep data for long term storage. Omitting the <--outdir> command will require the user to copy the pipeline results directory to the desired directory. This can consume a large amount of time when more than 5 samples are run.**
 ## <div align="center">Running Quaisar:</div>
+
 -------------------------------------------------------------------------------------------------------------------------------------------------------
 **Note:** First-time users will need to run the following command and allow the required databases to download:
     ```console
@@ -78,6 +82,7 @@ that impact functionality if these types of errors occur.
 Specifically, this error indicates that the user will need additional memory in order to run Kraken2.
 
 ![Workflow](docs/images/k2_error.PNG)
+
 ## Documentation
 
 
