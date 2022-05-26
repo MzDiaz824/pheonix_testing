@@ -9,13 +9,16 @@ def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
 // Validate input parameters
 WorkflowQuaisar.initialise(params, log)
 
+
 // TODO nf-core: Add all file path parameters for the pipeline to the list below
 // Check input path parameters to see if they exist
 def checkPathParamList = [ params.input, params.multiqc_config, params.fasta ]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
 // Check mandatory parameters
-if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
+
+//input on command line
+if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet/list not specified!' }
 
 /*
 ========================================================================================
@@ -35,11 +38,15 @@ ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multi
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-include { INPUT_CHECK  } from '../subworkflows/local/input_check'
-include { SPADES_LOCAL } from '../modules/local/localspades'
-include { BUSCO        } from '../modules/local/busco'
-include { GAMMA_PREP   } from '../modules/local/gammaprep'
-include { QUAST        } from '../modules/local/localquast'
+include { INPUT_CHECK            } from '../subworkflows/local/input_check'
+include { SPADES_LOCAL           } from '../modules/local/localspades'
+include { BUSCO                  } from '../modules/local/busco'
+include { GAMMA_S                } from '../modules/local/gammas'
+include { FASTP as FASTP_SINGLES } from '../modules/local/localfastp'
+include { BBMAP_REFORMAT         } from '../modules/local/contig_less500'
+include { GAMMA_PREP             } from '../modules/local/gammaprep'
+include { QUAST                  } from '../modules/local/localquast'
+
 
 /*
 ========================================================================================
@@ -51,20 +58,22 @@ include { QUAST        } from '../modules/local/localquast'
 // MODULE: Installed directly from nf-core/modules
 //
 include { BBMAP_BBDUK                       } from '../modules/nf-core/modules/bbmap/bbduk/main'
-include { FASTP                             } from '../modules/nf-core/modules/fastp/main'
+include { FASTP as FASTP_TRIMD              } from '../modules/nf-core/modules/fastp/main'
 include { FASTQC as FASTQCTRIMD             } from '../modules/nf-core/modules/fastqc/main'
 include { SRST2_SRST2 as SRST2_TRIMD_AR     } from '../modules/nf-core/modules/srst2/srst2/main'
-include { SRST2_SRST2 as SRST2_TRIMD_MLST   } from '../modules/nf-core/modules/srst2/srst2/main'
 include { KRAKEN2_KRAKEN2 as KRAKEN2_TRIMD  } from '../modules/nf-core/modules/kraken2/kraken2/main'
 include { KRAKEN2_KRAKEN2 as KRAKEN2_ASMBLD } from '../modules/nf-core/modules/kraken2/kraken2/main'
 include { SPADES                            } from '../modules/nf-core/modules/spades/main'
+include { MASH_SKETCH                       } from '../modules/nf-core/modules/mash/sketch/main'
 include { FASTANI                           } from '../modules/nf-core/modules/fastani/main'
 include { MLST                              } from '../modules/nf-core/modules/mlst/main'
 include { GAMMA as GAMMA_AR                 } from '../modules/nf-core/modules/gamma/main'
 include { PROKKA                            } from '../modules/nf-core/modules/prokka/main'
-include { GAMMA as GAMMA_REPL               } from '../modules/nf-core/modules/gamma/main'
+include { GAMMA as GAMMA_HV                 } from '../modules/nf-core/modules/gamma/main'
 include { MULTIQC                           } from '../modules/nf-core/modules/multiqc/main'
-include { CUSTOM_DUMPSOFTWAREVERSIONS       } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'/*
+include { CUSTOM_DUMPSOFTWAREVERSIONS       } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'
+
+/*
 ========================================================================================
     RUN MAIN WORKFLOW
 ========================================================================================
@@ -75,11 +84,18 @@ def multiqc_report = []
 
 workflow QUAISAR {
 
-    ch_versions     =   Channel.empty()
-    ch_tree_input   =   Channel.empty()
+    ch_versions     = Channel.empty()
+    ch_sra_list     = Channel.empty()
+    spades_ch       = Channel.empty()
+
+    if(params.sra_file)
+    {
+        ch_sra_list = from.SRA(params.sra_file)
+    }
     //
-    // SUBWORKFLOW: Read in samplesheet, validate and stage input files
+    // SUBWORKFLOW: Read in samplesheet/list, validate and stage input files
     //
+
     INPUT_CHECK (
         ch_input
     )
@@ -90,77 +106,95 @@ workflow QUAISAR {
     )
     ch_versions = ch_versions.mix(BBMAP_BBDUK.out.versions)
 
-    FASTP (
+    FASTP_TRIMD (
         BBMAP_BBDUK.out.reads, true, true
     )
-    ch_versions = ch_versions.mix(FASTP.out.versions)
+    ch_versions = ch_versions.mix(FASTP_TRIMD.out.versions)
+
+    FASTP_SINGLES (
+        FASTP_TRIMD.out.reads_fail, false, false
+    )
+    ch_versions = ch_versions.mix(FASTP_SINGLES.out.versions)
 
     FASTQCTRIMD (
-        FASTP.out.reads
+        FASTP_TRIMD.out.reads
     )
     ch_versions = ch_versions.mix(FASTQCTRIMD.out.versions.first())
 
-    //pending module improvements
-    /*SRST2_TRIMD_AR (
-        FASTP.out.reads.map{ meta, reads -> [ [id:meta.id, single_end:meta.single_end, db:'gene'], reads, params.ardb]}
-        //mlst_ch
-    )*/
-
+    SRST2_TRIMD_AR (
+        FASTP_TRIMD.out.reads.map{ meta, reads -> [ [id:meta.id, single_end:meta.single_end, db:'gene'], reads, params.ardb]}
+    )
+    ch_versions = ch_versions.mix(SRST2_TRIMD_AR.out.versions)
 
     KRAKEN2_TRIMD (
-        FASTP.out.reads, params.path2db, true, true
+        FASTP_TRIMD.out.reads, params.path2db, true, true
     )
     ch_versions = ch_versions.mix(KRAKEN2_TRIMD.out.versions)
 
     SPADES_LOCAL (
-        FASTP.out.reads
+        FASTP_TRIMD.out.reads
     )
     ch_versions = ch_versions.mix(SPADES_LOCAL.out.versions)
+    spades_ch = SPADES_LOCAL.out.scaffolds.map{meta, scaffolds -> [ [id:meta.id, single_end:true], scaffolds]}
 
-    FASTANI (
-        SPADES_LOCAL.out.scaffolds, params.ardb
+    BBMAP_REFORMAT (
+        spades_ch
     )
-    ch_versions = ch_versions.mix(FASTANI.out.versions)
+    ch_versions = ch_versions.mix(BBMAP_REFORMAT.out.versions)
+
+    GAMMA_PREP (
+        BBMAP_REFORMAT.out.reads
+    )
+
+    MASH_SKETCH (
+        GAMMA_PREP.out.prepped
+    )
+    ch_versions = ch_versions.mix(MASH_SKETCH.out.versions)
 
     MLST (
-        SPADES_LOCAL.out.scaffolds
+        BBMAP_REFORMAT.out.reads
     )
     ch_versions = ch_versions.mix(MLST.out.versions)
 
-    GAMMA_PREP (
-        SPADES_LOCAL.out.scaffolds
+    GAMMA_HV (
+        GAMMA_PREP.out.prepped, params.hvgamdb
     )
+    ch_versions = ch_versions.mix(GAMMA_HV.out.versions)
 
-    GAMMA_REPL (
+    GAMMA_AR (
+        GAMMA_PREP.out.prepped, params.ardb
+    )
+    ch_versions = ch_versions.mix(GAMMA_AR.out.versions)
+
+    GAMMA_S (
         GAMMA_PREP.out.prepped, params.gamdbpf
     )
-    ch_versions = ch_versions.mix(GAMMA_REPL.out.versions)
+    ch_versions = ch_versions.mix(GAMMA_S.out.versions)
 
-    PROKKA (
-        GAMMA_PREP.out.prepped, [], []
-    )
-    ch_versions = ch_versions.mix(PROKKA.out.versions)
-
-    QUAST (
-        SPADES_LOCAL.out.contigs
+   QUAST (
+        BBMAP_REFORMAT.out.reads
     )
     ch_versions = ch_versions.mix(QUAST.out.versions)
 
     BUSCO (
-        SPADES_LOCAL.out.scaffolds, 'auto', [], []
+        spades_ch, 'auto', [], []
     )
     ch_versions = ch_versions.mix(BUSCO.out.versions)
 
+    KRAKEN2_ASMBLD (
+        BBMAP_REFORMAT.out.reads, params.path2db, true, true
+    )
+    ch_versions = ch_versions.mix(KRAKEN2_ASMBLD.out.versions)
 
-    //error kraken2: --paired requires positive and even number filename
-    //KRAKEN2_ASMBLD (
-        //GAMMA_PREP.out.prepped, params.path2db, true, true
-    //)
-    //ch_versions = ch_versions.mix(KRAKEN2_ASMBLD.out.versions)
+    FASTANI (
+        SPADES_LOCAL.out.scaffolds, MASH_SKETCH.out.mash_sketch
+    )
+    ch_versions = ch_versions.mix(FASTANI.out.versions)
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
     )
+
 
     //
     // MODULE: MultiQC
