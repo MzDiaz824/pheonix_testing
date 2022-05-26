@@ -86,7 +86,8 @@ def multiqc_report = []
 workflow QUAISAR {
 
     ch_versions     =   Channel.empty()
-    ch_sra_list       = Channel.empty()
+    ch_sra_list     = Channel.empty()
+    spades_ch       = Channel.empty()
 
     if(params.sra_file)
     {
@@ -122,7 +123,7 @@ workflow QUAISAR {
     ch_versions = ch_versions.mix(FASTQCTRIMD.out.versions.first())
 
     SRST2_TRIMD_AR (
-        FASTP_TRIMD.out.reads.map{ meta, reads -> [ [id:meta.id, single_end:meta.single_end, db:'gene'], reads, params.srstar]}
+        FASTP_TRIMD.out.reads.map{ meta, reads -> [ [id:meta.id, single_end:meta.single_end, db:'gene'], reads, params.ardb]}
     )
     ch_versions = ch_versions.mix(SRST2_TRIMD_AR.out.versions)
 
@@ -135,6 +136,7 @@ workflow QUAISAR {
         FASTP_TRIMD.out.reads
     )
     ch_versions = ch_versions.mix(SPADES_LOCAL.out.versions)
+    spades_ch = SPADES_LOCAL.out.scaffolds.map{meta, scaffolds -> [ [id:meta.id, single_end:true], scaffolds]}
 
     BBMAP_REFORMAT (
         SPADES_LOCAL.out.scaffolds
@@ -182,7 +184,7 @@ workflow QUAISAR {
     //ch_versions = ch_versions.mix(QUAST.out.versions)
 
     BUSCO (
-        SPADES_LOCAL.out.scaffolds, 'auto', [], []
+        spades_ch, 'auto', [], []
     )
     ch_versions = ch_versions.mix(BUSCO.out.versions)
 
@@ -193,7 +195,7 @@ workflow QUAISAR {
     ch_versions = ch_versions.mix(KRAKEN2_ASMBLD.out.versions)
 
     FASTANI (
-        SPADES_LOCAL.out.scaffolds, params.ardb
+        SPADES_LOCAL.out.scaffolds, needs the mash sketch here
     )
     ch_versions = ch_versions.mix(FASTANI.out.versions)
 
