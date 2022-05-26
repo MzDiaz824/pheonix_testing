@@ -25,11 +25,13 @@ process GAMMA_S {
 
     script:
     def args = task.ext.args ?: ''
+    def prefix = task.ext.prefix ?: "${meta.id}"
     """
     GAMMA-S.py \\
         $args \\
         $fasta \\
-        $db
+        $db\\
+        $prefix
 
 
     cat <<-END_VERSIONS > versions.yml
