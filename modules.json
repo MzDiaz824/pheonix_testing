@@ -45,9 +45,6 @@
             "quast": {
                 "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
             },
-            "spades": {
-                "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
-            },
             "srst2/srst2": {
                 "git_sha": "24dc2d21132b07b4c3d36c9836885427a5019b11"
             }
