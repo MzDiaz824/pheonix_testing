@@ -6,9 +6,6 @@
             "bbmap/bbduk": {
                 "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
             },
-            "busco": {
-                "git_sha": "9fa6b6c1fc930830c1d819a9273b4ec12ffacb0a"
-            },
             "custom/dumpsoftwareversions": {
                 "git_sha": "20d8250d9f39ddb05dfb437603aaf99b5c0b2b41"
             },
@@ -26,6 +23,9 @@
             },
             "kraken2/kraken2": {
                 "git_sha": "abe025677cdd805cc93032341ab19885473c1a07"
+            },
+            "mash/dist": {
+                "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
             },
             "mash/sketch": {
                 "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
