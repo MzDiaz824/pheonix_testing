@@ -131,8 +131,10 @@ def check_samplesheet(file_in, file_out):
                 if not all(x[0] == sample_mapping_dict[sample][0][0] for x in sample_mapping_dict[sample]):
                     print_error("Multiple runs of a sample must be of the same datatype!", "Sample: {}".format(sample))
 
+#                for idx, val in enumerate(sample_mapping_dict[sample]):
+#                    fout.write(",".join(["{}_T{}".format(sample, idx + 1)] + val) + "\n")
                 for idx, val in enumerate(sample_mapping_dict[sample]):
-                    fout.write(",".join(["{}_T{}".format(sample, idx + 1)] + val) + "\n")
+                    fout.write(",".join(["{}{}".format(sample, idx)] + val) + "\n")
     else:
         print_error("No entries to process!", "Samplesheet: {}".format(file_in))
 
