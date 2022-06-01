@@ -1,3 +1,2 @@
 sample,fastq_1,fastq_2
-SAMPLE_PAIRED_END,/path/to/fastq/files/AEG588A1_S1_L002_R1_001.fastq.gz,/path/to/fastq/files/AEG588A1_S1_L002_R2_001.fastq.gz
-SAMPLE_SINGLE_END,/path/to/fastq/files/AEG588A4_S4_L003_R1_001.fastq.gz,
+SRR17084768,/scicomp/groups/OID/NCEZID/DHQP/CEMB/MiSeqAnalysisFiles/external/2021GO-0183/FASTQs/2021GO-0183_R1_001.fastq.gz,/scicomp/groups/OID/NCEZID/DHQP/CEMB/MiSeqAnalysisFiles/external/2021GO-0183/FASTQs/2021GO-0183_R2_001.fastq.gz
