@@ -12,7 +12,7 @@ WorkflowQuaisar.initialise(params, log)
 
 // TODO nf-core: Add all file path parameters for the pipeline to the list below
 // Check input path parameters to see if they exist
-def checkPathParamList = [ params.input, params.multiqc_config, params.fasta ]
+def checkPathParamList = [ params.input, params.multiqc_config ] //removed , params.fasta to stop issue w/connecting to aws and igenomes not used
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
 // Check mandatory parameters
@@ -46,7 +46,8 @@ include { FASTP as FASTP_SINGLES } from '../modules/local/localfastp'
 include { BBMAP_REFORMAT         } from '../modules/local/contig_less500'
 include { GAMMA_PREP             } from '../modules/local/gammaprep'
 include { QUAST                  } from '../modules/local/localquast'
-
+include { FASTANI                } from '../modules/local/localfastani'
+//include { GET_REFS               } from '../modules/local/getrefseqgenomes'
 
 /*
 ========================================================================================
@@ -63,14 +64,16 @@ include { FASTQC as FASTQCTRIMD             } from '../modules/nf-core/modules/f
 include { SRST2_SRST2 as SRST2_TRIMD_AR     } from '../modules/nf-core/modules/srst2/srst2/main'
 include { KRAKEN2_KRAKEN2 as KRAKEN2_TRIMD  } from '../modules/nf-core/modules/kraken2/kraken2/main'
 include { KRAKEN2_KRAKEN2 as KRAKEN2_ASMBLD } from '../modules/nf-core/modules/kraken2/kraken2/main'
-include { SPADES                            } from '../modules/nf-core/modules/spades/main'
 include { MASH_SKETCH                       } from '../modules/nf-core/modules/mash/sketch/main'
-include { FASTANI                           } from '../modules/nf-core/modules/fastani/main'
+include { MASH_DIST                         } from '../modules/nf-core/modules/mash/dist/main'
 include { MLST                              } from '../modules/nf-core/modules/mlst/main'
 include { GAMMA as GAMMA_AR                 } from '../modules/nf-core/modules/gamma/main'
 include { PROKKA                            } from '../modules/nf-core/modules/prokka/main'
 include { GAMMA as GAMMA_HV                 } from '../modules/nf-core/modules/gamma/main'
 include { MULTIQC                           } from '../modules/nf-core/modules/multiqc/main'
+include { KRONA_KRONADB                     } from '../modules/nf-core/modules/krona/kronadb/main'
+include { KRONA_KTIMPORTTAXONOMY            } from '../modules/nf-core/modules/krona/ktimporttaxonomy/main'
+include { KRONA_KTIMPORTTEXT                } from '../modules/nf-core/modules/krona/ktimporttext/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS       } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'
 
 /*
@@ -146,11 +149,6 @@ workflow QUAISAR {
         BBMAP_REFORMAT.out.reads
     )
 
-    MASH_SKETCH (
-        GAMMA_PREP.out.prepped
-    )
-    ch_versions = ch_versions.mix(MASH_SKETCH.out.versions)
-
     MLST (
         BBMAP_REFORMAT.out.reads
     )
@@ -186,11 +184,25 @@ workflow QUAISAR {
     )
     ch_versions = ch_versions.mix(KRAKEN2_ASMBLD.out.versions)
 
-    FASTANI (
-        SPADES_LOCAL.out.scaffolds, MASH_SKETCH.out.mash_sketch
+   FASTANI (
+        BBMAP_REFORMAT.out.reads, params.refs
     )
     ch_versions = ch_versions.mix(FASTANI.out.versions)
 
+/*
+    KRONA_KRONADB ( )
+    ch_versions = ch_versions.mix(KRONA_KRONADB.out.versions)
+
+    KRONA_KTIMPORTTAXONOMY (
+        KRAKEN2_ASMBLD.out.
+    )
+    ch_versions = ch_versions.mix(KRONA_KTIMPORTTAXONOMY.out.versions)
+
+    KRONA_KTIMPORTTEXT (
+        KRAKEN2_ASMBLD.out.report
+    )
+    ch_versions = ch_versions.mix(KRONA_KTIMPORTTEXT.out.versions)
+*/
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
     )
