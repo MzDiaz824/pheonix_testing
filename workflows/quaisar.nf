@@ -193,11 +193,6 @@ workflow QUAISAR {
     KRONA_KRONADB ( )
     ch_versions = ch_versions.mix(KRONA_KRONADB.out.versions)
 
-    KRONA_KTIMPORTTAXONOMY (
-        KRAKEN2_ASMBLD.out.report, KRONA_KRONADB.out.db
-    )
-    ch_versions = ch_versions.mix(KRONA_KTIMPORTTAXONOMY.out.versions)
-
     KRONA_KTIMPORTTEXT (
         KRAKEN2_ASMBLD.out.report
     )
