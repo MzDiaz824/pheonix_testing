@@ -7,7 +7,7 @@
 def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
 
 // Validate input parameters
-WorkflowQuaisar.initialise(params, log)
+WorkflowPhoenix.initialise(params, log)
 
 
 // TODO nf-core: Add all file path parameters for the pipeline to the list below
@@ -38,16 +38,17 @@ ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multi
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-include { INPUT_CHECK            } from '../subworkflows/local/input_check'
-include { SPADES_LOCAL           } from '../modules/local/localspades'
-include { BUSCO                  } from '../modules/local/busco'
-include { GAMMA_S                } from '../modules/local/gammas'
-include { FASTP as FASTP_SINGLES } from '../modules/local/localfastp'
-include { BBMAP_REFORMAT         } from '../modules/local/contig_less500'
-include { GAMMA_PREP             } from '../modules/local/gammaprep'
-include { QUAST                  } from '../modules/local/localquast'
-include { FASTANI                } from '../modules/local/localfastani'
-
+include { INPUT_CHECK                                   } from '../subworkflows/local/input_check'
+include { SPADES_LOCAL                                  } from '../modules/local/localspades'
+include { BUSCO                                         } from '../modules/local/busco'
+include { GAMMA_S                                       } from '../modules/local/gammas'
+include { FASTP as FASTP_SINGLES                        } from '../modules/local/localfastp'
+include { BBMAP_REFORMAT                                } from '../modules/local/contig_less500'
+include { GAMMA_PREP                                    } from '../modules/local/gammaprep'
+include { QUAST                                         } from '../modules/local/localquast'
+include { FASTANI                                       } from '../modules/local/localfastani'
+include { KRAKENTOOLS_KREPORT2MPA as KREPORT2MPA_TRIMD  } from '../modules/local/krakentools_kreport2mpa'
+include { KRAKENTOOLS_KREPORT2MPA as KREPORT2MPA_ASMBLD } from '../modules/local/krakentools_kreport2mpa'
 
 /*
 ========================================================================================
@@ -83,11 +84,11 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS                             } from '../mod
 // Info required for completion email and summary
 def multiqc_report = []
 
-workflow QUAISAR {
+workflow PHOENIX {
 
-    ch_versions     = Channel.empty()
+    ch_versions     = Channel.empty() // Used to collect the software versions
     ch_sra_list     = Channel.empty()
-    spades_ch       = Channel.empty()
+    spades_ch       = Channel.empty() // Used later to make new channel with single_end: true when scaffolds are created
 
     if(params.sra_file)
     {
@@ -97,47 +98,62 @@ workflow QUAISAR {
     // SUBWORKFLOW: Read in samplesheet/list, validate and stage input files
     //
 
+    // Call in reads
     INPUT_CHECK (
         ch_input
     )
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
 
+    // Remove PhiX reads
     BBMAP_BBDUK (
         INPUT_CHECK.out.reads, params.bbdukdb
     )
     ch_versions = ch_versions.mix(BBMAP_BBDUK.out.versions)
 
+    // Trim and remove low quality reads
     FASTP_TRIMD (
         BBMAP_BBDUK.out.reads, true, true
     )
     ch_versions = ch_versions.mix(FASTP_TRIMD.out.versions)
 
+    // Rerun on unpaired reads to get stats, nothing removed
     FASTP_SINGLES (
         FASTP_TRIMD.out.reads_fail, false, false
     )
     ch_versions = ch_versions.mix(FASTP_SINGLES.out.versions)
 
+    // Running Fastqc on trimmed reads
     FASTQCTRIMD (
         FASTP_TRIMD.out.reads
     )
     ch_versions = ch_versions.mix(FASTQCTRIMD.out.versions.first())
 
+    // Idenitifying AR genes in trimmed reads
     SRST2_TRIMD_AR (
         FASTP_TRIMD.out.reads.map{ meta, reads -> [ [id:meta.id, single_end:meta.single_end, db:'gene'], reads, params.ardb]}
     )
     ch_versions = ch_versions.mix(SRST2_TRIMD_AR.out.versions)
 
+    // Checking for Contamination in trimmed reads
     KRAKEN2_TRIMD (
         FASTP_TRIMD.out.reads, params.path2db, true, true
     )
     ch_versions = ch_versions.mix(KRAKEN2_TRIMD.out.versions)
 
+    // Create mpa file
+    KREPORT2MPA_TRIMD (
+        KRAKEN2_TRIMD.out.report
+    )
+    ch_versions = ch_versions.mix(KREPORT2MPA_TRIMD.out.versions)
+
+    // Assemblying into scaffolds
     SPADES_LOCAL (
         FASTP_TRIMD.out.reads
     )
     ch_versions = ch_versions.mix(SPADES_LOCAL.out.versions)
     spades_ch = SPADES_LOCAL.out.scaffolds.map{meta, scaffolds -> [ [id:meta.id, single_end:true], scaffolds]}
 
+    // Removing scaffolds <500bp
     BBMAP_REFORMAT (
         spades_ch
     )
@@ -147,16 +163,19 @@ workflow QUAISAR {
         BBMAP_REFORMAT.out.reads
     )
 
+    // Getting MLST scheme for taxa
     MLST (
         BBMAP_REFORMAT.out.reads
     )
     ch_versions = ch_versions.mix(MLST.out.versions)
 
+    // Running gamma to identify hypervirulence genes in scaffolds
     GAMMA_HV (
         GAMMA_PREP.out.prepped, params.hvgamdb
     )
     ch_versions = ch_versions.mix(GAMMA_HV.out.versions)
 
+    // Running gamma to identify AR genes in scaffolds
     GAMMA_AR (
         GAMMA_PREP.out.prepped, params.ardb
     )
@@ -167,22 +186,32 @@ workflow QUAISAR {
     )
     ch_versions = ch_versions.mix(GAMMA_S.out.versions)
 
-   QUAST (
+    // Getting Assembly Stats
+    QUAST (
         BBMAP_REFORMAT.out.reads
     )
     ch_versions = ch_versions.mix(QUAST.out.versions)
 
+    // Checking single copy genes for assembly completeness 
     BUSCO (
         spades_ch, 'auto', [], []
     )
     ch_versions = ch_versions.mix(BUSCO.out.versions)
 
+    // Getting species ID as back up for FastANI and checking contamination isn't in assembly
     KRAKEN2_ASMBLD (
         BBMAP_REFORMAT.out.reads, params.path2db, true, true
     )
     ch_versions = ch_versions.mix(KRAKEN2_ASMBLD.out.versions)
 
-   FASTANI (
+    // Create mpa file
+    KREPORT2MPA_ASMBLD (
+        KRAKEN2_ASMBLD.out.report
+    )
+    ch_versions = ch_versions.mix(KREPORT2MPA_ASMBLD.out.versions)
+
+    // Getting species ID
+    FASTANI (
         BBMAP_REFORMAT.out.reads, params.refs
     )
     ch_versions = ch_versions.mix(FASTANI.out.versions)
@@ -195,11 +224,12 @@ workflow QUAISAR {
     )
     ch_versions = ch_versions.mix(KRONA_KTIMPORTTEXT.out.versions)
 
-        KRONA_KTIMPORTTEXT_1 (
+    KRONA_KTIMPORTTEXT_1 (
         KRAKEN2_ASMBLD.out.report
     )
     ch_versions = ch_versions.mix(KRONA_KTIMPORTTEXT_1.out.versions)
 
+    // Collecting the software versions
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
     )
@@ -208,7 +238,7 @@ workflow QUAISAR {
     //
     // MODULE: MultiQC
     //
-    workflow_summary    = WorkflowQuaisar.paramsSummaryMultiqc(workflow, summary_params)
+    workflow_summary    = WorkflowPhoenix.paramsSummaryMultiqc(workflow, summary_params)
     ch_workflow_summary = Channel.value(workflow_summary)
 
     ch_multiqc_files = Channel.empty()

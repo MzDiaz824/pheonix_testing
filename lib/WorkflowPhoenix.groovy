@@ -1,8 +1,8 @@
 //
-// This file holds several functions specific to the workflow/quaisar.nf in the nf-core/quaisar pipeline
+// This file holds several functions specific to the workflow/phoenix.nf in the cdcgov/phoenix pipeline
 //
 
-class WorkflowQuaisar {
+class WorkflowPhoenix {
 
     //
     // Check and validate parameters

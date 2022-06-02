@@ -1,11 +1,10 @@
 #!/usr/bin/env nextflow
 /*
 ========================================================================================
-    nf-core/quaisar
+    CDCgov/phoenix
 ========================================================================================
-    Github : https://github.com/nf-core/quaisar
-    Website: https://nf-co.re/quaisar
-    Slack  : https://nfcore.slack.com/channels/quaisar
+    Github : https://github.com/CDCgov/phoenix
+    Slack  : https://staph-b-dev.slack.com/channels/phoenix-h-dev
 ----------------------------------------------------------------------------------------
 */
 
@@ -33,13 +32,13 @@ WorkflowMain.initialise(workflow, params, log)
 ========================================================================================
 */
 
-include { QUAISAR } from './workflows/quaisar'
+include { PHOENIX } from './workflows/phoenix'
 
 //
 // WORKFLOW: Run main nf-core/quaisar analysis pipeline
 //
-workflow NFCORE_QUAISAR {
-    QUAISAR ()
+workflow CDC_PHOENIX {
+    PHOENIX ()
 }
 
 /*
@@ -53,7 +52,7 @@ workflow NFCORE_QUAISAR {
 // See: https://github.com/nf-core/rnaseq/issues/619
 //
 workflow {
-    NFCORE_QUAISAR ()
+    CDC_PHOENIX ()
 }
 
 /*
