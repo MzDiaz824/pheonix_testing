@@ -59,23 +59,23 @@ include { FASTANI                } from '../modules/local/localfastani'
 //
 // MODULE: Installed directly from nf-core/modules
 //
-include { BBMAP_BBDUK                       } from '../modules/nf-core/modules/bbmap/bbduk/main'
-include { FASTP as FASTP_TRIMD              } from '../modules/nf-core/modules/fastp/main'
-include { FASTQC as FASTQCTRIMD             } from '../modules/nf-core/modules/fastqc/main'
-include { SRST2_SRST2 as SRST2_TRIMD_AR     } from '../modules/nf-core/modules/srst2/srst2/main'
-include { KRAKEN2_KRAKEN2 as KRAKEN2_TRIMD  } from '../modules/nf-core/modules/kraken2/kraken2/main'
-include { KRAKEN2_KRAKEN2 as KRAKEN2_ASMBLD } from '../modules/nf-core/modules/kraken2/kraken2/main'
-include { MASH_SKETCH                       } from '../modules/nf-core/modules/mash/sketch/main'
-include { MASH_DIST                         } from '../modules/nf-core/modules/mash/dist/main'
-include { MLST                              } from '../modules/nf-core/modules/mlst/main'
-include { GAMMA as GAMMA_AR                 } from '../modules/nf-core/modules/gamma/main'
-include { PROKKA                            } from '../modules/nf-core/modules/prokka/main'
-include { GAMMA as GAMMA_HV                 } from '../modules/nf-core/modules/gamma/main'
-include { MULTIQC                           } from '../modules/nf-core/modules/multiqc/main'
-include { KRONA_KRONADB                     } from '../modules/nf-core/modules/krona/kronadb/main'
-include { KRONA_KTIMPORTTAXONOMY            } from '../modules/nf-core/modules/krona/ktimporttaxonomy/main'
-include { KRONA_KTIMPORTTEXT                } from '../modules/nf-core/modules/krona/ktimporttext/main'
-include { CUSTOM_DUMPSOFTWAREVERSIONS       } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'
+include { BBMAP_BBDUK                                             } from '../modules/nf-core/modules/bbmap/bbduk/main'
+include { FASTP as FASTP_TRIMD                                    } from '../modules/nf-core/modules/fastp/main'
+include { FASTQC as FASTQCTRIMD                                   } from '../modules/nf-core/modules/fastqc/main'
+include { SRST2_SRST2 as SRST2_TRIMD_AR                           } from '../modules/nf-core/modules/srst2/srst2/main'
+include { KRAKEN2_KRAKEN2 as KRAKEN2_TRIMD                        } from '../modules/nf-core/modules/kraken2/kraken2/main'
+include { KRAKEN2_KRAKEN2 as KRAKEN2_ASMBLD                       } from '../modules/nf-core/modules/kraken2/kraken2/main'
+include { MASH_SKETCH                                             } from '../modules/nf-core/modules/mash/sketch/main'
+include { MASH_DIST                                               } from '../modules/nf-core/modules/mash/dist/main'
+include { MLST                                                    } from '../modules/nf-core/modules/mlst/main'
+include { GAMMA as GAMMA_AR                                       } from '../modules/nf-core/modules/gamma/main'
+include { PROKKA                                                  } from '../modules/nf-core/modules/prokka/main'
+include { GAMMA as GAMMA_HV                                       } from '../modules/nf-core/modules/gamma/main'
+include { MULTIQC                                                 } from '../modules/nf-core/modules/multiqc/main'
+include { KRONA_KRONADB                                           } from '../modules/nf-core/modules/krona/kronadb/main'
+include { KRONA_KTIMPORTTEXT as KRONA_KTIMPORTTEXT_1              } from '../modules/nf-core/modules/krona/ktimporttext/main'
+include { KRONA_KTIMPORTTEXT                                      } from '../modules/nf-core/modules/krona/ktimporttext/main'
+include { CUSTOM_DUMPSOFTWAREVERSIONS                             } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'
 
 /*
 ========================================================================================
@@ -197,6 +197,11 @@ workflow QUAISAR {
         KRAKEN2_ASMBLD.out.report
     )
     ch_versions = ch_versions.mix(KRONA_KTIMPORTTEXT.out.versions)
+
+        KRONA_KTIMPORTTEXT_1 (
+        KRAKEN2_ASMBLD.out.report
+    )
+    ch_versions = ch_versions.mix(KRONA_KTIMPORTTEXT_1.out.versions)
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
