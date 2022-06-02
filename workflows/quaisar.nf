@@ -47,7 +47,7 @@ include { BBMAP_REFORMAT         } from '../modules/local/contig_less500'
 include { GAMMA_PREP             } from '../modules/local/gammaprep'
 include { QUAST                  } from '../modules/local/localquast'
 include { FASTANI                } from '../modules/local/localfastani'
-include { AR_REPORT              } from '../modules/local/ar_report_gen'
+
 
 /*
 ========================================================================================
@@ -64,8 +64,6 @@ include { FASTQC as FASTQCTRIMD                                   } from '../mod
 include { SRST2_SRST2 as SRST2_TRIMD_AR                           } from '../modules/nf-core/modules/srst2/srst2/main'
 include { KRAKEN2_KRAKEN2 as KRAKEN2_TRIMD                        } from '../modules/nf-core/modules/kraken2/kraken2/main'
 include { KRAKEN2_KRAKEN2 as KRAKEN2_ASMBLD                       } from '../modules/nf-core/modules/kraken2/kraken2/main'
-include { MASH_SKETCH                                             } from '../modules/nf-core/modules/mash/sketch/main'
-include { MASH_DIST                                               } from '../modules/nf-core/modules/mash/dist/main'
 include { MLST                                                    } from '../modules/nf-core/modules/mlst/main'
 include { GAMMA as GAMMA_AR                                       } from '../modules/nf-core/modules/gamma/main'
 include { PROKKA                                                  } from '../modules/nf-core/modules/prokka/main'
@@ -129,17 +127,11 @@ workflow QUAISAR {
     )
     ch_versions = ch_versions.mix(SRST2_TRIMD_AR.out.versions)
 
-    /*AR_REPORT (
-        SRST2_TRIMD_AR.out.fullgene_results
-        //SRST2_TRIMD_AR.out.gene_results (doesn't work)
-    )
-    ch_versions = ch_versions.mix(AR_REPORT.out.versions)
-*/
     KRAKEN2_TRIMD (
         FASTP_TRIMD.out.reads, params.path2db, true, true
     )
     ch_versions = ch_versions.mix(KRAKEN2_TRIMD.out.versions)
-/*
+
     SPADES_LOCAL (
         FASTP_TRIMD.out.reads
     )
@@ -207,7 +199,7 @@ workflow QUAISAR {
         KRAKEN2_ASMBLD.out.report
     )
     ch_versions = ch_versions.mix(KRONA_KTIMPORTTEXT_1.out.versions)
-*/
+
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
     )
