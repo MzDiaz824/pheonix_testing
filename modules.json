@@ -24,6 +24,12 @@
             "kraken2/kraken2": {
                 "git_sha": "abe025677cdd805cc93032341ab19885473c1a07"
             },
+            "krona/kronadb": {
+                "git_sha": "a6086f549d1e10627ed5caa26f8e8d6485125869"
+            },
+            "krona/ktimporttext": {
+                "git_sha": "cdefbec66999c0b49d8bfeea9d6f9d19056635a2"
+            },
             "mash/dist": {
                 "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
             },
