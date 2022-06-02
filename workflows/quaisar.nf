@@ -47,8 +47,7 @@ include { BBMAP_REFORMAT         } from '../modules/local/contig_less500'
 include { GAMMA_PREP             } from '../modules/local/gammaprep'
 include { QUAST                  } from '../modules/local/localquast'
 include { FASTANI                } from '../modules/local/localfastani'
-//include { KRONA_KRONADB          } from '../modules/local/kronadbdwnld'
-//include { GET_REFS               } from '../modules/local/getrefseqgenomes'
+include { AR_REPORT              } from '../modules/local/ar_report_gen'
 
 /*
 ========================================================================================
@@ -130,11 +129,17 @@ workflow QUAISAR {
     )
     ch_versions = ch_versions.mix(SRST2_TRIMD_AR.out.versions)
 
+    /*AR_REPORT (
+        SRST2_TRIMD_AR.out.fullgene_results
+        //SRST2_TRIMD_AR.out.gene_results (doesn't work)
+    )
+    ch_versions = ch_versions.mix(AR_REPORT.out.versions)
+*/
     KRAKEN2_TRIMD (
         FASTP_TRIMD.out.reads, params.path2db, true, true
     )
     ch_versions = ch_versions.mix(KRAKEN2_TRIMD.out.versions)
-
+/*
     SPADES_LOCAL (
         FASTP_TRIMD.out.reads
     )
@@ -202,7 +207,7 @@ workflow QUAISAR {
         KRAKEN2_ASMBLD.out.report
     )
     ch_versions = ch_versions.mix(KRONA_KTIMPORTTEXT_1.out.versions)
-
+*/
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
     )
