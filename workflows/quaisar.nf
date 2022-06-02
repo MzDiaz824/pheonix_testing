@@ -47,6 +47,7 @@ include { BBMAP_REFORMAT         } from '../modules/local/contig_less500'
 include { GAMMA_PREP             } from '../modules/local/gammaprep'
 include { QUAST                  } from '../modules/local/localquast'
 include { FASTANI                } from '../modules/local/localfastani'
+//include { KRONA_KRONADB          } from '../modules/local/kronadbdwnld'
 //include { GET_REFS               } from '../modules/local/getrefseqgenomes'
 
 /*
@@ -189,12 +190,11 @@ workflow QUAISAR {
     )
     ch_versions = ch_versions.mix(FASTANI.out.versions)
 
-/*
     KRONA_KRONADB ( )
     ch_versions = ch_versions.mix(KRONA_KRONADB.out.versions)
 
     KRONA_KTIMPORTTAXONOMY (
-        KRAKEN2_ASMBLD.out.
+        KRAKEN2_ASMBLD.out.report, KRONA_KRONADB.out.db
     )
     ch_versions = ch_versions.mix(KRONA_KTIMPORTTAXONOMY.out.versions)
 
@@ -202,7 +202,7 @@ workflow QUAISAR {
         KRAKEN2_ASMBLD.out.report
     )
     ch_versions = ch_versions.mix(KRONA_KTIMPORTTEXT.out.versions)
-*/
+
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
     )
