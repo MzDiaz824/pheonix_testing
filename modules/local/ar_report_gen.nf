@@ -8,7 +8,6 @@ process AR_REPORT {
     tuple val(meta), path(ar_report)
 
     output:
-    path "versions.yml"                                          , optional:true,        emit: versions
     path "*.ar-report.html"                                      , optional:true,        emit: ar_html
     path "*.ar-report.docx"                                      , optional:true,        emit: ar_docx
 
