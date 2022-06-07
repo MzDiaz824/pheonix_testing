@@ -54,7 +54,7 @@ include { FORMAT_ANI                                    } from '../modules/local
 include { KRAKEN_BEST_HIT                               } from '../modules/local/kraken_bh'
 include { GATHERING_READ_QC_STATS                       } from '../modules/local/fastp_minimizer'
 include { DETERMINE_TAXA_ID                             } from '../modules/local/tax_classifier'
-
+include { CALCULATE_ASSEMBLY_RATIO                      } from '../modules/local/assembly_ratio'
 
 /*
 ========================================================================================
@@ -251,8 +251,13 @@ workflow PHOENIX {
     )
 
     // Getting ID from either FastANI or if fails, from Kraken2
-    DETERMINE_TAXA_ID(
+    DETERMINE_TAXA_ID (
         KRAKENTOOLS_MAKEKREPORT.out.kraken_weighted_report, FORMAT_ANI.out.ani_best_hit, params.taxa
+    )
+
+    // Calculating the assembly ratio
+    CALCULATE_ASSEMBLY_RATIO (
+        DETERMINE_TAXA_ID.out.taxonomy, QUAST.out.tsv, params.ncbi_stats
     )
 
     KRONA_KRONADB ( )
