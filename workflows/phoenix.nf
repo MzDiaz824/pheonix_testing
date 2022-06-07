@@ -49,6 +49,8 @@ include { QUAST                                         } from '../modules/local
 include { FASTANI                                       } from '../modules/local/localfastani'
 include { KRAKENTOOLS_KREPORT2MPA as KREPORT2MPA_TRIMD  } from '../modules/local/krakentools_kreport2mpa'
 include { KRAKENTOOLS_KREPORT2MPA as KREPORT2MPA_ASMBLD } from '../modules/local/krakentools_kreport2mpa'
+include { KRAKENTOOLS_MAKEKREPORT                       } from '../modules/local/krakentools_makekreport'
+
 
 /*
 ========================================================================================
@@ -65,6 +67,7 @@ include { FASTQC as FASTQCTRIMD                                   } from '../mod
 include { SRST2_SRST2 as SRST2_TRIMD_AR                           } from '../modules/nf-core/modules/srst2/srst2/main'
 include { KRAKEN2_KRAKEN2 as KRAKEN2_TRIMD                        } from '../modules/nf-core/modules/kraken2/kraken2/main'
 include { KRAKEN2_KRAKEN2 as KRAKEN2_ASMBLD                       } from '../modules/nf-core/modules/kraken2/kraken2/main'
+include { KRAKEN2_KRAKEN2 as KRAKEN2_ASMBLD_WEIGHTED              } from '../modules/nf-core/modules/kraken2/kraken2/main'
 include { MLST                                                    } from '../modules/nf-core/modules/mlst/main'
 include { GAMMA as GAMMA_AR                                       } from '../modules/nf-core/modules/gamma/main'
 include { PROKKA                                                  } from '../modules/nf-core/modules/prokka/main'
@@ -209,6 +212,18 @@ workflow PHOENIX {
         KRAKEN2_ASMBLD.out.report
     )
     ch_versions = ch_versions.mix(KREPORT2MPA_ASMBLD.out.versions)
+
+    // Getting species ID as back up for FastANI and checking contamination isn't in assembly
+    KRAKEN2_ASMBLD_WEIGHTED (
+        BBMAP_REFORMAT.out.reads, params.path2db, true, true
+    )
+    ch_versions = ch_versions.mix(KRAKEN2_ASMBLD.out.versions)
+
+    // Create weighted kraken report based on scaffold length
+    KRAKENTOOLS_MAKEKREPORT (
+        KRAKEN2_ASMBLD_WEIGHTED.out.classified_reads_assignment, params.ktaxmap
+    )
+    ch_versions = ch_versions.mix(KRAKENTOOLS_MAKEKREPORT.out.versions)
 
     // Getting species ID
     FASTANI (
