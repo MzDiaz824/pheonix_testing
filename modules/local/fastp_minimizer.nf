@@ -15,7 +15,7 @@ process GATHERING_READ_QC_STATS {
     tuple val(meta), path('*_raw_read_counts.txt'), emit: fastp_raw_qc
     tuple val(meta), path('*_trimmed_read_counts.txt'), emit: fastp_total_qc
 
-    script:
+    script: // This script is bundled with the pipeline, in cdcgov/phoenix/bin/
     """
     FastP_QC.py \\
       --trimmed_json ${fastp_trimd_json} \\

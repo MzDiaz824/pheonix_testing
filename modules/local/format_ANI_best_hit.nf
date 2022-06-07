@@ -8,7 +8,7 @@ process FORMAT_ANI {
     output:
     tuple val(meta), path('*.fastANI.txt'), emit: ani_best_hit
 
-    script:
+    script: // This script is bundled with the pipeline, in cdcgov/phoenix/bin/
     """
     ANI_best_hit_formatter.sh -a $ani_file
     """

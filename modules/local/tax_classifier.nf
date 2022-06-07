@@ -10,7 +10,7 @@ process DETERMINE_TAXA_ID {
     output:
     tuple val(meta), path('*.tax'), emit: taxonomy
 
-    script:
+    script: // This script is bundled with the pipeline, in cdcgov/phoenix/bin/
     """
     determine_taxID.sh -k $kraken_weighted -s $meta.id -f $formatted_ani_file -d $taxa_file 
     """
