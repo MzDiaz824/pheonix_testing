@@ -10,6 +10,6 @@ process FORMAT_ANI {
 
     script:
     """
-    ANI_best_hit_formatter.sh -e $ani_file
+    ANI_best_hit_formatter.sh -a $ani_file
     """
 }

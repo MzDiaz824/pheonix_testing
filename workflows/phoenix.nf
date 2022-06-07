@@ -53,7 +53,7 @@ include { KRAKENTOOLS_MAKEKREPORT                       } from '../modules/local
 include { FORMAT_ANI                                    } from '../modules/local/format_ANI_best_hit'
 include { KRAKEN_BEST_HIT                               } from '../modules/local/kraken_bh'
 include { GATHERING_READ_QC_STATS                       } from '../modules/local/fastp_minimizer'
-//include { DETERMINE_TAXA_ID                             } from '../modules/local/tax_classifier'
+include { DETERMINE_TAXA_ID                             } from '../modules/local/tax_classifier'
 
 
 /*
@@ -248,6 +248,11 @@ workflow PHOENIX {
     // Reformat ANI headers
     FORMAT_ANI (
         FASTANI.out.ani
+    )
+
+    // Getting ID from either FastANI or if fails, from Kraken2
+    DETERMINE_TAXA_ID(
+        KRAKENTOOLS_MAKEKREPORT.out.kraken_weighted_report, FORMAT_ANI.out.ani_best_hit, params.taxa
     )
 
     KRONA_KRONADB ( )

@@ -14,7 +14,7 @@ process KRAKENTOOLS_MAKEKREPORT {
     path(ktax_map)
 
     output:
-    tuple val(meta), path('*_weighted_report.txt'), emit: kraken_weighted
+    tuple val(meta), path('*_weighted_report.txt'), emit: kraken_weighted_report
     path "versions.yml"                           , emit: versions
 
     script: // This script is bundled with the pipeline, in phoenix/bin/

@@ -17,13 +17,13 @@
 
 #  Function to print out help blurb
 show_help () {
-	echo "./ANI_best_hit_formatter.sh -e explicit_path_to_isolate_folder"
-	echo "required: -e = path to isolate folder"
+	echo "./ANI_best_hit_formatter.sh -a ani_file"
+	echo "required: -a = ani file"
 }
 
 # Parse command line options
 options_found=0
-while getopts ":h?e:" option; do
+while getopts ":h?a:" option; do
 	options_found=$(( options_found + 1 ))
 	case "${option}" in
 		\?)
@@ -31,9 +31,9 @@ while getopts ":h?e:" option; do
       show_help
       exit 0
       ;;
-		e)
-			echo "Option -e triggered, argument = ${OPTARG}"
-			epath=${OPTARG};;
+		a)
+			echo "Option -a triggered, argument = ${OPTARG}"
+			ani_file=${OPTARG};;
 		:)
 			echo "Option -${OPTARG} requires as argument";;
 		h)
@@ -62,7 +62,6 @@ fi
 #fi
 
 #ani_file=$(find "${OUTDATADIR}/ANI" -type f -name "${sample_name}.ani.*.txt" | sort -k3,3 -Vrt '.' | head -n1)
-ani_file=${epath}
 sample_name=$(basename "${ani_file}" .ani.txt)
 
 if [[ ! -f ${ani_file} ]]; then
