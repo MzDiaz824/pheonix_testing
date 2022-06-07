@@ -53,10 +53,10 @@ process FASTP {
         fastp \\
             --in1 ${prefix}_1.fastq.gz \\
             --in2 ${prefix}_2.fastq.gz \\
-            --out1 ${prefix}_1.trim.fastq.gz \\
-            --out2 ${prefix}_2.trim.fastq.gz \\
-            --json ${prefix}.fastp.json \\
-            --html ${prefix}.fastp.html \\
+            --out1 ${prefix}_1_unpaired.trim.fastq.gz \\
+            --out2 ${prefix}_2_unpaired.trim.fastq.gz \\
+            --json ${prefix}_unpaired.fastp.json \\
+            --html ${prefix}_unpaired.fastp.html \\
             $fail_fastq \\
             $merge_fastq \\
             --thread $task.cpus \\

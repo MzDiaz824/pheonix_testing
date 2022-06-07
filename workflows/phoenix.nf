@@ -50,6 +50,10 @@ include { FASTANI                                       } from '../modules/local
 include { KRAKENTOOLS_KREPORT2MPA as KREPORT2MPA_TRIMD  } from '../modules/local/krakentools_kreport2mpa'
 include { KRAKENTOOLS_KREPORT2MPA as KREPORT2MPA_ASMBLD } from '../modules/local/krakentools_kreport2mpa'
 include { KRAKENTOOLS_MAKEKREPORT                       } from '../modules/local/krakentools_makekreport'
+include { FORMAT_ANI                                    } from '../modules/local/format_ANI_best_hit'
+include { KRAKEN_BEST_HIT                               } from '../modules/local/kraken_bh'
+include { GATHERING_READ_QC_STATS                       } from '../modules/local/fastp_minimizer'
+//include { DETERMINE_TAXA_ID                             } from '../modules/local/tax_classifier'
 
 
 /*
@@ -124,6 +128,11 @@ workflow PHOENIX {
         FASTP_TRIMD.out.reads_fail, false, false
     )
     ch_versions = ch_versions.mix(FASTP_SINGLES.out.versions)
+
+    // Script gathers data from jsons for pipeline stats file
+    GATHERING_READ_QC_STATS(
+        FASTP_TRIMD.out.json, FASTP_SINGLES.out.json
+    )
 
     // Running Fastqc on trimmed reads
     FASTQCTRIMD (
@@ -213,6 +222,11 @@ workflow PHOENIX {
     )
     ch_versions = ch_versions.mix(KREPORT2MPA_ASMBLD.out.versions)
 
+    // Getting Kraken best hit
+    KRAKEN_BEST_HIT(
+        KRAKEN2_ASMBLD.out.report
+    )
+
     // Getting species ID as back up for FastANI and checking contamination isn't in assembly
     KRAKEN2_ASMBLD_WEIGHTED (
         BBMAP_REFORMAT.out.reads, params.path2db, true, true
@@ -230,6 +244,11 @@ workflow PHOENIX {
         BBMAP_REFORMAT.out.reads, params.refs
     )
     ch_versions = ch_versions.mix(FASTANI.out.versions)
+
+    // Reformat ANI headers
+    FORMAT_ANI (
+        FASTANI.out.ani
+    )
 
     KRONA_KRONADB ( )
     ch_versions = ch_versions.mix(KRONA_KRONADB.out.versions)
