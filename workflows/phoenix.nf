@@ -77,7 +77,6 @@ include { GAMMA as GAMMA_AR                                       } from '../mod
 include { PROKKA                                                  } from '../modules/nf-core/modules/prokka/main'
 include { GAMMA as GAMMA_HV                                       } from '../modules/nf-core/modules/gamma/main'
 include { MULTIQC                                                 } from '../modules/nf-core/modules/multiqc/main'
-include { KRONA_KRONADB                                           } from '../modules/nf-core/modules/krona/kronadb/main'
 include { KRONA_KTIMPORTTEXT as KRONA_KTIMPORTTEXT_1              } from '../modules/nf-core/modules/krona/ktimporttext/main'
 include { KRONA_KTIMPORTTEXT                                      } from '../modules/nf-core/modules/krona/ktimporttext/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS                             } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'
@@ -260,16 +259,13 @@ workflow PHOENIX {
         DETERMINE_TAXA_ID.out.taxonomy, QUAST.out.tsv, params.ncbi_stats
     )
 
-    KRONA_KRONADB ( )
-    ch_versions = ch_versions.mix(KRONA_KRONADB.out.versions)
-
     KRONA_KTIMPORTTEXT (
         KRAKEN2_ASMBLD.out.report
     )
     ch_versions = ch_versions.mix(KRONA_KTIMPORTTEXT.out.versions)
 
     KRONA_KTIMPORTTEXT_1 (
-        KRAKEN2_ASMBLD.out.report
+        KRAKEN2_TRIMD.out.report
     )
     ch_versions = ch_versions.mix(KRONA_KTIMPORTTEXT_1.out.versions)
 
