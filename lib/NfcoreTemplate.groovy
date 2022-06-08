@@ -245,12 +245,12 @@ class NfcoreTemplate {
         String.format(
             """\n
             ${dashedLine(monochrome_logs)}
-                                                    ${colors.green},--.${colors.black}/${colors.green},-.${colors.reset}
-            ${colors.blue}        ___     __   __   __   ___     ${colors.green}/,-._.--~\'${colors.reset}
-            ${colors.blue}  |\\ | |__  __ /  ` /  \\ |__) |__         ${colors.yellow}}  {${colors.reset}
-            ${colors.blue}  | \\| |       \\__, \\__/ |  \\ |___     ${colors.green}\\`-._,-`-,${colors.reset}
-                                                    ${colors.green}`._,._,\'${colors.reset}
-            ${colors.purple}  ${workflow.manifest.name} v${workflow.manifest.version}${colors.reset}
+            ${colors.bired}  ___                           _____       ${colors.reset}
+            ${colors.bired} |   \\  |   |   __   ___  |\\  |   |    \\  / ${colors.reset}
+            ${colors.bired} |___/  |___|  /  \\ |___  | \\ |   |     \\/  ${colors.reset}
+            ${colors.bired} |      |   |  \\__/ |___  |  \\| __|__  /  \\ ${colors.reset}
+            ${colors.bired}                                                        ${colors.reset}
+            ${colors.bicyan}  ${workflow.manifest.name} v${workflow.manifest.version}${colors.reset}
             ${dashedLine(monochrome_logs)}
             """.stripIndent()
         )
