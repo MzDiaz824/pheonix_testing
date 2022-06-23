@@ -52,7 +52,7 @@ workflow CDC_PHOENIX {
 // See: https://github.com/nf-core/rnaseq/issues/619
 //
 workflow {
-    CDC_PHOENIX ()
+    SRA_ENTRY ()
 }
 
 /*
