@@ -73,16 +73,16 @@ class WorkflowMain {
         NfcoreTemplate.awsBatch(workflow, params)
 
         // Check input has been provided
-        if (!params.input) {
+        /*if (!params.input) {
             log.error "Please provide an input samplesheet to the pipeline e.g. '--input samplesheet.csv'"
             System.exit(1)
-        }
+        }*/
     }
 
-    //
+    //NOT USING GENOMES SUPPLIED
     // Get attribute from genome config file e.g. fasta
     //
-    public static String getGenomeAttribute(params, attribute) {
+    /*public static String getGenomeAttribute(params, attribute) {
         def val = ''
         if (params.genomes && params.genome && params.genomes.containsKey(params.genome)) {
             if (params.genomes[ params.genome ].containsKey(attribute)) {
@@ -90,5 +90,5 @@ class WorkflowMain {
             }
         }
         return val
-    }
+    }*/
 }
