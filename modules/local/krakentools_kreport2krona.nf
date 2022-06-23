@@ -1,6 +1,6 @@
-def VERSION = 'https://github.com/jenniferlu717/KrakenTools/commit/ff29ebc975b8416bceb1e3928f360ac098fbd0e3' // Version information not provided by tool on CLI
+def VERSION = 'https://github.com/jenniferlu717/KrakenTools/commit/1271ae2ee2289148f9d4bae4a59323d7a8ea288a' // Version information not provided by tool on CLI
 
-process KRAKENTOOLS_KREPORT2MPA {
+process KRAKEN2_KRONA {
     tag "$meta.id"
     label 'process_low'
 
@@ -11,17 +11,18 @@ process KRAKENTOOLS_KREPORT2MPA {
 
     input:
     tuple val(meta), path(kraken_report)
+    val(type) //weighted, trimmmed or assembled
 
     output:
-    tuple val(meta), path('*.mpa'), emit: mpa
-    path "versions.yml"           , emit: versions
+    tuple val(meta), path('*.krona'), emit: krona
+    path "versions.yml"             , emit: versions
 
-    script: // This script is bundled with the pipeline, in phoenix/bin/
+    script: // This script is bundled with the pipeline, in phoenix/bin/ orginally from https://github.com/jenniferlu717/KrakenTools on 6/15/2022
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    kreport2mpa.py \\
-        --report-file ${kraken_report} \\
-        --output ${prefix}.mpa
+    kreport2krona.py \\
+        --report ${kraken_report} \\
+        --output ${prefix}_${type}.krona
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

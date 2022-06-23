@@ -1,5 +1,4 @@
-process SAMPLESHEET_CHECK {
-    tag "$samplesheet"
+process GATHER_SUMMARY_LINES {
     label 'process_low'
 
     conda (params.enable_conda ? "conda-forge::python=3.8.3" : null)
@@ -8,17 +7,17 @@ process SAMPLESHEET_CHECK {
         'quay.io/biocontainers/python:3.8.3' }"
 
     input:
-    path samplesheet
+    path(summary_line_files)
 
     output:
-    path '*.csv'       , emit: csv
-    path "versions.yml", emit: versions
+    path 'Phoenix_Output_Report.tsv'  , emit: summary_report
+    path "versions.yml"                , emit: versions
 
     script: // This script is bundled with the pipeline, in cdcgov/phoenix/bin/
     """
-    check_samplesheet.py \\
-        $samplesheet \\
-        samplesheet.valid.csv
+    Create_phoenix_summary_tsv.py \\
+        --out Phoenix_Output_Report.tsv \\
+        $summary_line_files
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

@@ -14,17 +14,18 @@ process KRAKENTOOLS_MAKEKREPORT {
     path(ktax_map)
 
     output:
-    tuple val(meta), path('*_weighted_report.txt'), emit: kraken_weighted_report
+    tuple val(meta), path('*_wtasmbld.report.txt'), emit: kraken_weighted_report
     path "versions.yml"                           , emit: versions
 
     script: // This script is bundled with the pipeline, in phoenix/bin/
     // This script has to be run with kraken output that does not use --use-names flag https://github.com/jenniferlu717/KrakenTools/issues/29
     // see  folder /scicomp/groups/OID/NCEZID/DHQP/CEMB/databases/minikraken2DB/
     // taxonomy file comes from ./QuAISAR_Nextflow/bin/make_ktaxonomy.py --nodes ./taxonomy/nodes.dmp --names ./taxonomy/names.dmp --seqid2taxid seqid2taxid.map --output ktax_map.k2
+    def prefix = task.ext.prefix ?: "${meta.id}"
     """
     make_kreport.py \\
         --input ${kraken_output} \\
-        --output ${meta.id}_weighted_report.txt \\
+        --output ${prefix}.kraken2_wtasmbld.report.txt \\
         --taxonomy ${ktax_map} \\
         --use-read-len
     

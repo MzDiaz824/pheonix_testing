@@ -1,6 +1,6 @@
 def VERSION = '2.1' // Version information not provided by tool on CLI
 
-process GAMMA_S {
+process GAMMA {
     tag "$meta.id"
     label 'process_low'
 
@@ -32,19 +32,18 @@ process GAMMA_S {
     then
         FNAME=\$(basename ${fasta} .gz)
         gunzip -f ${fasta}
-        GAMMA-S.py \\
+        GAMMA.py \\
         $args \\
         \$FNAME \\
         $db \\
         ${prefix}_\$db_name
     else
-        GAMMA-S.py \\
+        GAMMA.py \\
         $args \\
         $fasta \\
         $db \\
         ${prefix}_\$db_name
     fi
-
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

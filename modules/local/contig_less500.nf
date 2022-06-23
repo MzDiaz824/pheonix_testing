@@ -12,9 +12,9 @@ process BBMAP_REFORMAT {
 
 
     output:
-    tuple val(meta), path('*formatted.scaffolds.fa.gz')   , emit: reads
-    tuple val(meta), path('*.log')     , emit: log
-    path "versions.yml"                , emit: versions
+    tuple val(meta), path('*filtered.scaffolds.fa.gz')   , emit: reads
+    tuple val(meta), path('*.log')                       , emit: log
+    path "versions.yml"                                  , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -23,7 +23,7 @@ process BBMAP_REFORMAT {
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     def raw      = "in=${reads[0]}"
-    def trimmed  = "out=${prefix}.formatted.scaffolds.fa.gz"
+    def trimmed  = "out=${prefix}.filtered.scaffolds.fa.gz"
     def minlength = params.minlength
     """
     reformat.sh \\
@@ -32,7 +32,7 @@ process BBMAP_REFORMAT {
         threads=$task.cpus \\
         $args \\
         minlength=$minlength \\
-        &> ${prefix}.reformat.log
+        &> ${prefix}.bbmap_filtered.log
 
 
     cat <<-END_VERSIONS > versions.yml
