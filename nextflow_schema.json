@@ -284,18 +284,6 @@
             "type": "string",
             "default": "./results/prokka"
         },
-        "genome": {
-            "type": "string",
-            "default": "R64-1-1"
-        },
-        "igenomes_base": {
-            "type": "string",
-            "default": "s3://ngi-igenomes/igenomes"
-        },
-        "igenomes_ignore": {
-            "type": "string",
-            "default": "false"
-        },
         "fanireads": {
             "type": "string",
             "default": "./results/assemblies500plus"
