@@ -243,7 +243,7 @@ workflow PHOENIX {
     ch_versions = ch_versions.mix(BUSCO.out.versions)
 
     // Getting species ID as back up for FastANI and checking contamination isn't in assembly
-    KRAKEN2_ASMBLD (
+    /*KRAKEN2_ASMBLD (
         BBMAP_REFORMAT.out.reads, params.path2db, "asmbld", true, true
     )
     ch_versions = ch_versions.mix(KRAKEN2_ASMBLD.out.versions)
@@ -306,7 +306,7 @@ workflow PHOENIX {
         KREPORT2KRONA_WTASMBLD.out.krona, "wtasmbld"
     )
     ch_versions = ch_versions.mix(KRONA_KTIMPORTTEXT_WTASMBLD.out.versions)
-
+*/
     // Running Mash distance to get top 20 matches for fastANI to speed things up
     MASH_DIST (
         BBMAP_REFORMAT.out.reads, params.mash_sketch
@@ -338,9 +338,9 @@ workflow PHOENIX {
     )
 
     // Combining weighted kraken report with the FastANI hit based on meta.id
-    best_hit_ch = KRAKENTOOLS_MAKEKREPORT.out.kraken_weighted_report.map{meta, kraken_weighted_report -> [[id:meta.id], kraken_weighted_report]}\
+    /*best_hit_ch = KRAKENTOOLS_MAKEKREPORT.out.kraken_weighted_report.map{meta, kraken_weighted_report -> [[id:meta.id], kraken_weighted_report]}\
     .join(FORMAT_ANI.out.ani_best_hit.map{                               meta, ani_best_hit           -> [[id:meta.id], ani_best_hit ]}, by: [0])
-
+*/
     // Getting ID from either FastANI or if fails, from Kraken2
     DETERMINE_TAXA_ID (
         best_hit_ch, params.taxa
@@ -377,7 +377,7 @@ workflow PHOENIX {
         all_summaries_ch
     )
     ch_versions = ch_versions.mix(GATHER_SUMMARY_LINES.out.versions)
-
+/*
     // Combining output based on id:meta.id to create pipeline stats file by sample -- is this verbose, ugly and annoying. yes, if anyone has a slicker way to do this we welcome the input. 
     pipeline_stats_ch = FASTP_TRIMD.out.reads.map{                    meta, reads                        -> [[id:meta.id],reads]}\
     .join(GATHERING_READ_QC_STATS.out.fastp_raw_qc.map{               meta, fastp_raw_qc                 -> [[id:meta.id],fastp_raw_qc]},                 by: [0])\
@@ -407,7 +407,7 @@ workflow PHOENIX {
     GENERATE_PIPELINE_STATS (
         pipeline_stats_ch
     )
-
+*/
     // Collecting the software versions
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
