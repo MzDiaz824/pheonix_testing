@@ -32,13 +32,14 @@ WorkflowMain.initialise(workflow, params, log)
 ========================================================================================
 */
 
-include { PHOENIX } from './workflows/phoenix'
+//include { PHOENIX } from './workflows/sra_phoenix'
 
 //
 // WORKFLOW: Run main nf-core/quaisar analysis pipeline
 //
 workflow CDC_PHOENIX {
-    PHOENIX ()
+   // PHOENIX ()
+   SRA_PHOENIX ()
 }
 
 /*
