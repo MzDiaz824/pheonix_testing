@@ -38,7 +38,7 @@ ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multi
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
 include { INPUT_CHECK                                       } from '../subworkflows/local/input_check'
-include { KRAKEN2_KRAKEN2 as KRAKEN2_TRIMD                  } from '../modules/local/kraken2'
+/*include { KRAKEN2_KRAKEN2 as KRAKEN2_TRIMD                  } from '../modules/local/kraken2'
 include { KRAKEN2_KRAKEN2 as KRAKEN2_ASMBLD                 } from '../modules/local/kraken2'
 include { KRAKEN2_KRAKEN2 as KRAKEN2_ASMBLD_WEIGHTED        } from '../modules/local/kraken2'
 include { KRAKEN2_KRONA as KREPORT2KRONA_TRIMD              } from '../modules/local/krakentools_kreport2krona'
@@ -46,7 +46,7 @@ include { KRAKEN2_KRONA as KREPORT2KRONA_ASMBLD             } from '../modules/l
 include { KRAKEN2_KRONA as KREPORT2KRONA_WTASMBLD           } from '../modules/local/krakentools_kreport2krona'
 include { KRONA_KTIMPORTTEXT as KRONA_KTIMPORTTEXT_TRIMD    } from '../modules/local/ktimporttext'
 include { KRONA_KTIMPORTTEXT as KRONA_KTIMPORTTEXT_ASMBLD   } from '../modules/local/ktimporttext'
-include { KRONA_KTIMPORTTEXT as KRONA_KTIMPORTTEXT_WTASMBLD } from '../modules/local/ktimporttext'
+include { KRONA_KTIMPORTTEXT as KRONA_KTIMPORTTEXT_WTASMBLD } from '../modules/local/ktimporttext'*/
 include { SPADES_LOCAL                                      } from '../modules/local/spades'
 include { RENAME_FASTA_HEADERS                              } from '../modules/local/rename_fasta_headers'
 include { BUSCO                                             } from '../modules/local/busco'
