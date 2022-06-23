@@ -1,4 +1,4 @@
-#!/bin/sh -l
+#!/bin/bash -l
 #
 # Description: Creates a single file that attempts to pull the best taxonomic information from the isolate. Currently, it operates in a linear fashion, e.g. 1.ANI, 2.kraken2
 # 	The taxon is chosen based on the highest ranked classifier first
@@ -97,7 +97,7 @@ Check_source() {
 
 # Function to pull info from ANI output
 do_ANI() {
-	source="ANI_REFSEQ_UTD"
+	source="ANI_REFSEQ"
 #	source_file=$(find "${OUTDATADIR}/ANI" -type f -name "${sample_name}.fastANI_*.txt" | sort -k3,3 -Vrt '.' | head -n1)
 	source_file="${fastani_file}"
 	if [[ -s "${fastani_file}" ]]; then

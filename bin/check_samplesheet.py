@@ -57,7 +57,6 @@ def check_samplesheet(file_in, file_out):
 
         ## Check header
         MIN_COLS = 2
-        # TODO nf-core: Update the column names for the input samplesheet
         HEADER = ["sample", "fastq_1", "fastq_2"]
         header = [x.strip('"') for x in fin.readline().strip().split(",")]
         if header[: len(HEADER)] != HEADER:

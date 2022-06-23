@@ -1,4 +1,4 @@
-#!/bin/sh -l
+#!/bin/bash -l
 
 #
 # Description: Script to format ANI output to include more information on the top line
@@ -17,13 +17,13 @@
 
 #  Function to print out help blurb
 show_help () {
-	echo "./ANI_best_hit_formatter.sh -a ani_file"
+	echo "./ANI_best_hit_formatter.sh -a ani_file -n sample_name"
 	echo "required: -a = ani file"
 }
 
 # Parse command line options
 options_found=0
-while getopts ":h?a:" option; do
+while getopts ":h?a:n:" option; do
 	options_found=$(( options_found + 1 ))
 	case "${option}" in
 		\?)
@@ -34,6 +34,9 @@ while getopts ":h?a:" option; do
 		a)
 			echo "Option -a triggered, argument = ${OPTARG}"
 			ani_file=${OPTARG};;
+		n)
+			echo "Option -n triggered, argument = ${OPTARG}"
+			sample_name=${OPTARG};;
 		:)
 			echo "Option -${OPTARG} requires as argument";;
 		h)
@@ -62,7 +65,7 @@ fi
 #fi
 
 #ani_file=$(find "${OUTDATADIR}/ANI" -type f -name "${sample_name}.ani.*.txt" | sort -k3,3 -Vrt '.' | head -n1)
-sample_name=$(basename "${ani_file}" .ani.txt)
+#sample_name=$(basename "${ani_file}" .ani.txt)
 
 if [[ ! -f ${ani_file} ]]; then
 	echo "ani file does not exist, exiting"
