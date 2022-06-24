@@ -21,6 +21,21 @@
                     "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row. See [usage docs](https://nf-co.re/quaisar/usage#samplesheet-input).",
                     "fa_icon": "fas fa-file-csv"
                 },
+                "sra_input": {
+                    "type": "string",
+                    "format": "file-path",
+                    "mimetype": "text/plain",
+                    "pattern": "^\\S+\\.txt$",
+                    "schema": "assets/schema_input.json",
+                    "fa_icon": "fas fa-file-excel",
+                    "description": "File containing SRA/ENA/DDBJ/GEO identifiers one per line to download their associated metadata and FastQ files."
+                },
+                "force_sratools_download": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-tools",
+                    "description": "Force download FASTQ files via sra-tools instead of via the ENA FTP.",
+                    "help_text": "If FTP connections are blocked on your network use this flag to force the pipeline to download data using sra-tools instead of the ENA FTP."
+                },
                 "outdir": {
                     "type": "string",
                     "description": "Path to the output directory where the results will be saved.",
